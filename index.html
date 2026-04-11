@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -13,42 +14,155 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
   <style>
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    html, body { width: 100%; height: 100%; overflow: hidden; margin: 0; padding: 0; }
-    body { font-family: 'Nanum Gothic', 'Malgun Gothic', sans-serif; background: #c7f2d8; }
-    #root { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Nanum Gothic', 'Malgun Gothic', sans-serif;
+      background: #c7f2d8;
+    }
+
+    #root {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     #app {
-      width: 100%; max-width: 1024px; height: 100vh; max-height: 768px;
-      display: flex; flex-direction: column; overflow: hidden;
+      width: 100%;
+      height: 100vh;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
       background: linear-gradient(160deg, #f0fdf4 0%, #ecfeff 60%, #f0f9ff 100%);
-      border-radius: 0; box-shadow: 0 0 60px rgba(0,0,0,0.15);
     }
-    @media (min-width: 768px) {
-      #app { border-radius: 2.5rem; height: 96vh; }
+
+    .card {
+      background: #fff;
+      border-radius: 1.75rem;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.07);
     }
-    .card { background: #fff; border-radius: 1.75rem; box-shadow: 0 8px 28px rgba(0,0,0,0.07); }
-    .card-green  { border: 3px solid #bbf7d0; }
-    .card-teal   { border: 3px solid #99f6e4; }
-    .card-amber  { border: 3px solid #fde68a; }
-    .card-pink   { border: 3px solid #fbcfe8; }
-    .word-keep { word-break: keep-all; }
-    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
-    .float { animation: float 3.5s ease-in-out infinite; }
-    @keyframes pulse-btn { 0%,100%{box-shadow: 0 0 0 0 rgba(239,68,68,0.4)} 50%{box-shadow: 0 0 0 16px rgba(239,68,68,0)} }
-    .pulse-red { animation: pulse-btn 1.5s ease-in-out infinite; }
-    .btn { transition: transform .12s, box-shadow .12s; cursor: pointer; user-select: none; }
-    .btn:active { transform: scale(.95); }
-    .scroll-y { overflow-y: auto; -webkit-overflow-scrolling: touch; }
-    .scroll-y::-webkit-scrollbar { width: 4px; }
-    .scroll-y::-webkit-scrollbar-thumb { background: #d1fae5; border-radius: 99px; }
+
+    .card-green {
+      border: 3px solid #bbf7d0;
+    }
+
+    .card-teal {
+      border: 3px solid #99f6e4;
+    }
+
+    .card-amber {
+      border: 3px solid #fde68a;
+    }
+
+    .card-pink {
+      border: 3px solid #fbcfe8;
+    }
+
+    .word-keep {
+      word-break: keep-all;
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0)
+      }
+
+      50% {
+        transform: translateY(-8px)
+      }
+    }
+
+    .float {
+      animation: float 3.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse-btn {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4)
+      }
+
+      50% {
+        box-shadow: 0 0 0 16px rgba(239, 68, 68, 0)
+      }
+    }
+
+    .pulse-red {
+      animation: pulse-btn 1.5s ease-in-out infinite;
+    }
+
+    .btn {
+      transition: transform .12s, box-shadow .12s;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .btn:active {
+      transform: scale(.95);
+    }
+
+    .scroll-y {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .scroll-y::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .scroll-y::-webkit-scrollbar-thumb {
+      background: #d1fae5;
+      border-radius: 99px;
+    }
+
     /* 큰 글씨 기본 (저학년 태블릿용) */
-    .txt-xl { font-size: clamp(1.3rem, 3vw, 1.75rem); }
-    .txt-2xl { font-size: clamp(1.6rem, 3.5vw, 2.1rem); }
-    .txt-3xl { font-size: clamp(1.9rem, 4vw, 2.5rem); }
-    .txt-4xl { font-size: clamp(2.2rem, 5vw, 3rem); }
-    .txt-hero { font-size: clamp(2.5rem, 6vw, 3.8rem); }
-    .emoji-lg { font-size: clamp(3rem, 8vw, 5rem); line-height: 1; }
-    .emoji-xl { font-size: clamp(4rem, 10vw, 6.5rem); line-height: 1; }
+    .txt-xl {
+      font-size: clamp(1.1rem, 3vmin, 1.6rem);
+    }
+
+    .txt-2xl {
+      font-size: clamp(1.3rem, 3.5vmin, 1.9rem);
+    }
+
+    .txt-3xl {
+      font-size: clamp(1.6rem, 4.2vmin, 2.4rem);
+    }
+
+    .txt-4xl {
+      font-size: clamp(1.9rem, 5vmin, 2.8rem);
+    }
+
+    .txt-hero {
+      font-size: clamp(2.2rem, 6vmin, 3.5rem);
+    }
+
+    .emoji-lg {
+      font-size: clamp(2.5rem, 7vmin, 4.5rem);
+      line-height: 1.1;
+    }
+
+    .emoji-xl {
+      font-size: clamp(3.5rem, 10vmin, 6rem);
+      line-height: 1.1;
+    }
   </style>
 
   <script>
@@ -59,7 +173,7 @@
       try {
         const r = await fetch(`${GAS_URL}?action=${action}`, { redirect: 'follow' });
         return JSON.parse(await r.text());
-      } catch(_) { return null; }
+      } catch (_) { return null; }
     };
     const gasPost = async (data) => {
       try {
@@ -68,7 +182,7 @@
           headers: { 'Content-Type': 'text/plain' },
           body: JSON.stringify(data)
         });
-      } catch(_) {}
+      } catch (_) { }
     };
 
     /* ── 기본 학생 목록 ─────────────────────────── */
@@ -94,40 +208,40 @@
 
     /* ── 기본 단어 DB (구글시트에서 덮어씀) ──────── */
     let WORD_DB = [
-      { id:'펄럭펄럭', cat:'모양', emoji:'🦋', desc:'나비나 깃발이 가볍게 흔들리는 모양', ex:'나비가 펄럭펄럭 날아갑니다.' },
-      { id:'쿨쿨',     cat:'소리', emoji:'😴', desc:'잠을 깊이 자면서 나는 부드러운 숨소리', ex:'아기가 쿨쿨 자고 있어요.' },
-      { id:'멍멍',     cat:'소리', emoji:'🐶', desc:'강아지가 짖을 때 나는 소리', ex:'강아지가 멍멍 짖어요.' },
-      { id:'활짝',     cat:'모양', emoji:'🌻', desc:'꽃이나 창문이 크게 열린 모양', ex:'해바라기가 활짝 피었습니다.' },
-      { id:'쌩쌩',     cat:'소리', emoji:'🌬️', desc:'바람이 빠르게 지나가는 소리', ex:'바람이 쌩쌩 불어요.' },
-      { id:'반짝반짝', cat:'모양', emoji:'⭐', desc:'별이나 유리창처럼 빛이 나는 모양', ex:'별이 반짝반짝 빛나요.' },
-      { id:'살금살금', cat:'모양', emoji:'🐱', desc:'남이 모르게 조용히 걷는 모양', ex:'고양이가 살금살금 걸어요.' },
-      { id:'알록달록', cat:'모양', emoji:'🎨', desc:'여러 가지 빛깔이 아름답게 섞인 모양', ex:'꽃이 알록달록 예쁘게 피었어요.' },
-      { id:'깡충깡충', cat:'모양', emoji:'🐰', desc:'토끼처럼 발을 모아 가볍게 뛰는 모양', ex:'토끼가 깡충깡충 뛰어요.' },
-      { id:'졸졸',     cat:'소리', emoji:'💧', desc:'물이 가늘게 흐르는 소리', ex:'시냇물이 졸졸 흘러요.' },
+      { id: '펄럭펄럭', cat: '모양', emoji: '🦋', desc: '나비나 깃발이 가볍게 흔들리는 모양', ex: '나비가 펄럭펄럭 날아갑니다.' },
+      { id: '쿨쿨', cat: '소리', emoji: '😴', desc: '잠을 깊이 자면서 나는 부드러운 숨소리', ex: '아기가 쿨쿨 자고 있어요.' },
+      { id: '멍멍', cat: '소리', emoji: '🐶', desc: '강아지가 짖을 때 나는 소리', ex: '강아지가 멍멍 짖어요.' },
+      { id: '활짝', cat: '모양', emoji: '🌻', desc: '꽃이나 창문이 크게 열린 모양', ex: '해바라기가 활짝 피었습니다.' },
+      { id: '쌩쌩', cat: '소리', emoji: '🌬️', desc: '바람이 빠르게 지나가는 소리', ex: '바람이 쌩쌩 불어요.' },
+      { id: '반짝반짝', cat: '모양', emoji: '⭐', desc: '별이나 유리창처럼 빛이 나는 모양', ex: '별이 반짝반짝 빛나요.' },
+      { id: '살금살금', cat: '모양', emoji: '🐱', desc: '남이 모르게 조용히 걷는 모양', ex: '고양이가 살금살금 걸어요.' },
+      { id: '알록달록', cat: '모양', emoji: '🎨', desc: '여러 가지 빛깔이 아름답게 섞인 모양', ex: '꽃이 알록달록 예쁘게 피었어요.' },
+      { id: '깡충깡충', cat: '모양', emoji: '🐰', desc: '토끼처럼 발을 모아 가볍게 뛰는 모양', ex: '토끼가 깡충깡충 뛰어요.' },
+      { id: '졸졸', cat: '소리', emoji: '💧', desc: '물이 가늘게 흐르는 소리', ex: '시냇물이 졸졸 흘러요.' },
     ];
 
     /* ── 기본 퀴즈 DB (구글시트에서 덮어씀) ──────── */
     let QUIZ_Q = [
-      { id:1,  img:'🦋', before:'나비가',               after:'날아갑니다.',      opts:['펄럭펄럭','쿵쿵'],      a:'펄럭펄럭', fb:'맞아! 나비 날개는 가볍게 "펄럭펄럭" 움직여요.',      concept:'모양을 꾸며주는 말' },
-      { id:2,  img:'🇰🇷', before:'태극기가 바람에',       after:'휘날립니다.',      opts:['펄럭펄럭','살금살금'],  a:'펄럭펄럭', fb:'깃발이 바람에 흔들리는 모양도 "펄럭펄럭"이에요.',    concept:'모양을 꾸며주는 말' },
-      { id:3,  img:'😴', before:'아기가',               after:'자고 있어요.',     opts:['쨍그랑','쿨쿨'],        a:'쿨쿨',     fb:'아기가 깊이 잠든 숨소리는 "쿨쿨"이에요.',           concept:'소리를 꾸며주는 말' },
-      { id:4,  img:'🐻', before:'잠꾸러기 곰이',          after:'잡니다.',          opts:['쿨쿨','반짝반짝'],      a:'쿨쿨',     fb:'동물들이 깊게 잘 때도 "쿨쿨" 잔다고 해요.',         concept:'소리를 꾸며주는 말' },
-      { id:5,  img:'🐶', before:'강아지가',             after:'짖어요.',          opts:['살금살금','멍멍'],       a:'멍멍',     fb:'강아지는 씩씩하게 "멍멍" 하고 짖어요.',             concept:'소리를 꾸며주는 말' },
-      { id:6,  img:'🐕', before:'누렁이가 꼬리를 흔들며', after:'짖습니다.',        opts:['멍멍','졸졸'],          a:'멍멍',     fb:'강아지 짖는 소리는 "멍멍"이에요.',                  concept:'소리를 꾸며주는 말' },
-      { id:7,  img:'🌻', before:'해바라기가',            after:'피었습니다.',      opts:['활짝','엉엉'],           a:'활짝',     fb:'꽃이 크게 핀 모양은 "활짝"이라고 해요.',            concept:'모양을 꾸며주는 말' },
-      { id:8,  img:'😁', before:'친구가 나를 보고',       after:'웃었어요.',        opts:['활짝','쿨쿨'],          a:'활짝',     fb:'얼굴 가득 웃음이 피어날 때도 "활짝 웃다"라고 해요.', concept:'모양을 꾸며주는 말' },
-      { id:9,  img:'🌬️', before:'바람이',               after:'불어요.',          opts:['반짝반짝','쌩쌩'],       a:'쌩쌩',     fb:'바람이 빠르게 지나가는 소리는 "쌩쌩"이에요.',       concept:'소리를 꾸며주는 말' },
-      { id:10, img:'🚲', before:'자전거가 언덕을',        after:'내려갑니다.',      opts:['쌩쌩','알록달록'],       a:'쌩쌩',     fb:'빠르게 달려갈 때도 "쌩쌩"이라고 표현해요.',         concept:'소리를 꾸며주는 말' },
-      { id:11, img:'⭐', before:'밤하늘에 별이',          after:'빛나요.',          opts:['반짝반짝','쿵쿵'],       a:'반짝반짝', fb:'별처럼 빛나는 모양은 "반짝반짝"이에요.',            concept:'모양을 꾸며주는 말' },
-      { id:12, img:'🪟', before:'유리창이',              after:'빛납니다.',        opts:['반짝반짝','멍멍'],       a:'반짝반짝', fb:'아주 깨끗해서 윤이 날 때도 "반짝반짝"이에요.',      concept:'모양을 꾸며주는 말' },
-      { id:13, img:'🐱', before:'고양이가',              after:'걸어요.',          opts:['살금살금','멍멍'],       a:'살금살금', fb:'소리 없이 걷는 모양은 "살금살금"이에요.',           concept:'모양을 꾸며주는 말' },
-      { id:14, img:'🍪', before:'몰래 과자를 먹으려고',   after:'다가갔어요.',      opts:['살금살금','쌩쌩'],       a:'살금살금', fb:'들키지 않으려고 조심조심 걷는 것도 "살금살금"이에요.', concept:'모양을 꾸며주는 말' },
-      { id:15, img:'🎨', before:'꽃이',                  after:'예쁘게 피었어요.', opts:['알록달록','사각사각'],   a:'알록달록', fb:'여러 색이 섞인 모양은 "알록달록"이에요.',            concept:'모양을 꾸며주는 말' },
-      { id:16, img:'🍁', before:'가을 산이 참',           after:'물들었어요.',      opts:['알록달록','활짝'],       a:'알록달록', fb:'단풍이 여러 색깔로 예쁘게 변한 것도 "알록달록"이에요.', concept:'모양을 꾸며주는 말' },
-      { id:17, img:'🐰', before:'토끼가',                 after:'뛰어요.',          opts:['깡충깡충','쌩쌩'],       a:'깡충깡충', fb:'토끼처럼 뛰는 모양은 "깡충깡충"이에요.',           concept:'모양을 꾸며주는 말' },
-      { id:18, img:'🐸', before:'개구리가 연잎 위를',     after:'뜁니다.',          opts:['깡충깡충','졸졸'],       a:'깡충깡충', fb:'다리를 모아 폴짝 뛰는 모습을 말해요.',              concept:'모양을 꾸며주는 말' },
-      { id:19, img:'💧', before:'시냇물이',               after:'흘러요.',          opts:['졸졸','알록달록'],       a:'졸졸',     fb:'물이 가늘게 흐르는 소리는 "졸졸"이에요.',            concept:'소리를 꾸며주는 말' },
-      { id:20, img:'🚰', before:'약수터에서 물이',         after:'나옵니다.',        opts:['졸졸','펄럭펄럭'],       a:'졸졸',     fb:'물이 조금씩 끊임없이 흐를 때도 "졸졸" 흘러요.',      concept:'소리를 꾸며주는 말' },
+      { id: 1, img: '🦋', before: '나비가', after: '날아갑니다.', opts: ['펄럭펄럭', '쿵쿵'], a: '펄럭펄럭', fb: '맞아! 나비 날개는 가볍게 "펄럭펄럭" 움직여요.', concept: '모양을 꾸며주는 말' },
+      { id: 2, img: '🇰🇷', before: '태극기가 바람에', after: '휘날립니다.', opts: ['펄럭펄럭', '살금살금'], a: '펄럭펄럭', fb: '깃발이 바람에 흔들리는 모양도 "펄럭펄럭"이에요.', concept: '모양을 꾸며주는 말' },
+      { id: 3, img: '😴', before: '아기가', after: '자고 있어요.', opts: ['쨍그랑', '쿨쿨'], a: '쿨쿨', fb: '아기가 깊이 잠든 숨소리는 "쿨쿨"이에요.', concept: '소리를 꾸며주는 말' },
+      { id: 4, img: '🐻', before: '잠꾸러기 곰이', after: '잡니다.', opts: ['쿨쿨', '반짝반짝'], a: '쿨쿨', fb: '동물들이 깊게 잘 때도 "쿨쿨" 잔다고 해요.', concept: '소리를 꾸며주는 말' },
+      { id: 5, img: '🐶', before: '강아지가', after: '짖어요.', opts: ['살금살금', '멍멍'], a: '멍멍', fb: '강아지는 씩씩하게 "멍멍" 하고 짖어요.', concept: '소리를 꾸며주는 말' },
+      { id: 6, img: '🐕', before: '누렁이가 꼬리를 흔들며', after: '짖습니다.', opts: ['멍멍', '졸졸'], a: '멍멍', fb: '강아지 짖는 소리는 "멍멍"이에요.', concept: '소리를 꾸며주는 말' },
+      { id: 7, img: '🌻', before: '해바라기가', after: '피었습니다.', opts: ['활짝', '엉엉'], a: '활짝', fb: '꽃이 크게 핀 모양은 "활짝"이라고 해요.', concept: '모양을 꾸며주는 말' },
+      { id: 8, img: '😁', before: '친구가 나를 보고', after: '웃었어요.', opts: ['활짝', '쿨쿨'], a: '활짝', fb: '얼굴 가득 웃음이 피어날 때도 "활짝 웃다"라고 해요.', concept: '모양을 꾸며주는 말' },
+      { id: 9, img: '🌬️', before: '바람이', after: '불어요.', opts: ['반짝반짝', '쌩쌩'], a: '쌩쌩', fb: '바람이 빠르게 지나가는 소리는 "쌩쌩"이에요.', concept: '소리를 꾸며주는 말' },
+      { id: 10, img: '🚲', before: '자전거가 언덕을', after: '내려갑니다.', opts: ['쌩쌩', '알록달록'], a: '쌩쌩', fb: '빠르게 달려갈 때도 "쌩쌩"이라고 표현해요.', concept: '소리를 꾸며주는 말' },
+      { id: 11, img: '⭐', before: '밤하늘에 별이', after: '빛나요.', opts: ['반짝반짝', '쿵쿵'], a: '반짝반짝', fb: '별처럼 빛나는 모양은 "반짝반짝"이에요.', concept: '모양을 꾸며주는 말' },
+      { id: 12, img: '🪟', before: '유리창이', after: '빛납니다.', opts: ['반짝반짝', '멍멍'], a: '반짝반짝', fb: '아주 깨끗해서 윤이 날 때도 "반짝반짝"이에요.', concept: '모양을 꾸며주는 말' },
+      { id: 13, img: '🐱', before: '고양이가', after: '걸어요.', opts: ['살금살금', '멍멍'], a: '살금살금', fb: '소리 없이 걷는 모양은 "살금살금"이에요.', concept: '모양을 꾸며주는 말' },
+      { id: 14, img: '🍪', before: '몰래 과자를 먹으려고', after: '다가갔어요.', opts: ['살금살금', '쌩쌩'], a: '살금살금', fb: '들키지 않으려고 조심조심 걷는 것도 "살금살금"이에요.', concept: '모양을 꾸며주는 말' },
+      { id: 15, img: '🎨', before: '꽃이', after: '예쁘게 피었어요.', opts: ['알록달록', '사각사각'], a: '알록달록', fb: '여러 색이 섞인 모양은 "알록달록"이에요.', concept: '모양을 꾸며주는 말' },
+      { id: 16, img: '🍁', before: '가을 산이 참', after: '물들었어요.', opts: ['알록달록', '활짝'], a: '알록달록', fb: '단풍이 여러 색깔로 예쁘게 변한 것도 "알록달록"이에요.', concept: '모양을 꾸며주는 말' },
+      { id: 17, img: '🐰', before: '토끼가', after: '뛰어요.', opts: ['깡충깡충', '쌩쌩'], a: '깡충깡충', fb: '토끼처럼 뛰는 모양은 "깡충깡충"이에요.', concept: '모양을 꾸며주는 말' },
+      { id: 18, img: '🐸', before: '개구리가 연잎 위를', after: '뜁니다.', opts: ['깡충깡충', '졸졸'], a: '깡충깡충', fb: '다리를 모아 폴짝 뛰는 모습을 말해요.', concept: '모양을 꾸며주는 말' },
+      { id: 19, img: '💧', before: '시냇물이', after: '흘러요.', opts: ['졸졸', '알록달록'], a: '졸졸', fb: '물이 가늘게 흐르는 소리는 "졸졸"이에요.', concept: '소리를 꾸며주는 말' },
+      { id: 20, img: '🚰', before: '약수터에서 물이', after: '나옵니다.', opts: ['졸졸', '펄럭펄럭'], a: '졸졸', fb: '물이 조금씩 끊임없이 흐를 때도 "졸졸" 흘러요.', concept: '소리를 꾸며주는 말' },
     ];
 
     /* ── 수료증 PNG 다운로드 ─────────────────────── */
@@ -136,10 +250,10 @@
       cv.width = 1200; cv.height = 1500;
       const ctx = cv.getContext('2d');
       // 배경
-      ctx.fillStyle = '#f0fdf4'; ctx.fillRect(0,0,1200,1500);
+      ctx.fillStyle = '#f0fdf4'; ctx.fillRect(0, 0, 1200, 1500);
       // 외곽선
-      ctx.strokeStyle = '#34d399'; ctx.lineWidth = 40; ctx.strokeRect(40,40,1120,1420);
-      ctx.strokeStyle = '#bbf7d0'; ctx.lineWidth = 15; ctx.strokeRect(70,70,1060,1360);
+      ctx.strokeStyle = '#34d399'; ctx.lineWidth = 40; ctx.strokeRect(40, 40, 1120, 1420);
+      ctx.strokeStyle = '#bbf7d0'; ctx.lineWidth = 15; ctx.strokeRect(70, 70, 1060, 1360);
       // 제목
       ctx.textAlign = 'center';
       ctx.font = 'bold 96px sans-serif'; ctx.fillStyle = '#059669';
@@ -151,11 +265,11 @@
       ctx.fillText(`${name} 탐험가`, 600, 510);
       // 본문
       ctx.font = '50px sans-serif'; ctx.fillStyle = '#475569';
-      ['위 탐험가는 문장을 생생하게 꾸며주는 말을', '바르게 사용하는 실력을 갖추었기에', '이 수료증을 수여합니다.'].forEach((l,i) => ctx.fillText(l, 600, 680 + i*90));
+      ['위 탐험가는 문장을 생생하게 꾸며주는 말을', '바르게 사용하는 실력을 갖추었기에', '이 수료증을 수여합니다.'].forEach((l, i) => ctx.fillText(l, 600, 680 + i * 90));
       // 별점
       if (stars > 0) {
         ctx.font = '70px sans-serif';
-        const starStr = '⭐'.repeat(stars) + '☆'.repeat(5-stars);
+        const starStr = '⭐'.repeat(stars) + '☆'.repeat(5 - stars);
         ctx.fillText(starStr, 600, 950);
       }
       // 배운 단어
@@ -177,630 +291,644 @@
     };
   </script>
 </head>
+
 <body>
-<div id="root"><div id="app"></div></div>
-
-<script type="text/babel">
-const { useState, useEffect, useRef, useCallback } = React;
-
-/* ── 홈 아이콘 ─────────────────────────────── */
-const HomeIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-    <polyline points="9 22 9 12 15 12 15 22"/>
-  </svg>
-);
-
-/* ── 진행바 ──────────────────────────────── */
-const ProgressBar = ({ current, total }) => (
-  <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
-    <div className="h-full bg-gradient-to-r from-green-400 to-teal-400 rounded-full transition-all duration-500"
-         style={{width: `${(current/total)*100}%`}}/>
+  <div id="root">
+    <div id="app"></div>
   </div>
-);
 
-/* ── 헤더 ──────────────────────────────────── */
-const Header = ({ label, soundOn, toggleSound, progress }) => (
-  <div className="flex items-center justify-between px-5 py-3 shrink-0 border-b border-slate-100 bg-white/60 backdrop-blur-sm">
-    <div className="flex items-center gap-3">
-      <button onClick={() => window.location.reload()}
-        className="btn flex items-center justify-center w-12 h-12 bg-white rounded-2xl border-2 border-slate-100 text-slate-400 shadow-sm">
-        <HomeIcon/>
-      </button>
-      <span className="txt-xl font-black text-slate-500 bg-white px-4 py-2 rounded-2xl border border-slate-100 shadow-sm">{label}</span>
-    </div>
-    <div className="flex items-center gap-3">
-      {progress && (
-        <div className="hidden sm:block w-32">
-          <ProgressBar current={progress.current} total={progress.total}/>
-          <p className="text-center text-slate-400 font-bold mt-1" style={{fontSize:'0.85rem'}}>{progress.current}/{progress.total}</p>
-        </div>
-      )}
-      <button onClick={toggleSound}
-        className={`btn w-14 h-14 rounded-2xl border-2 shadow-sm text-3xl ${soundOn ? 'bg-green-100 text-green-600 border-green-200' : 'bg-white text-slate-300 border-slate-100'}`}>
-        {soundOn ? '🔊' : '🔇'}
-      </button>
-    </div>
-  </div>
-);
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useCallback } = React;
 
-/* ── 연필 마스코트 ────────────────────────── */
-const Mascot = ({ size = 100 }) => (
-  <svg width={size} height={size * 1.3} viewBox="0 0 100 130" fill="none">
-    <rect x="38" y="10" width="24" height="90" rx="4" fill="#FBBF24" stroke="#92400E" strokeWidth="3"/>
-    <rect x="38" y="10" width="24" height="15" rx="3" fill="#FDE68A"/>
-    <polygon points="38,100 50,125 62,100" fill="#FCD34D" stroke="#92400E" strokeWidth="2"/>
-    <polygon points="44,112 50,125 56,112" fill="#1e293b"/>
-    <circle cx="46" cy="58" r="3.5" fill="#1e293b"/>
-    <circle cx="54" cy="58" r="3.5" fill="#1e293b"/>
-    <circle cx="47" cy="57" r="1" fill="white"/>
-    <circle cx="55" cy="57" r="1" fill="white"/>
-    <path d="M46 68 Q50 74 54 68" stroke="#92400E" strokeWidth="2.5" strokeLinecap="round"/>
-    <path d="M38 40 C20 35 15 65 30 70" stroke="#86EFAC" strokeWidth="5" strokeLinecap="round" fill="none"/>
-    <path d="M62 40 C80 35 85 65 70 70" stroke="#86EFAC" strokeWidth="5" strokeLinecap="round" fill="none"/>
-  </svg>
-);
+    /* ── 홈 아이콘 ─────────────────────────────── */
+    const HomeIcon = () => (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+        <polyline points="9 22 9 12 15 12 15 22" />
+      </svg>
+    );
 
-/* ══════════════════════════════════════════════
-   앱 본체
-══════════════════════════════════════════════ */
-const App = () => {
-  const [phase,       setPhase]       = useState('loading');
-  const [students,    setStudents]    = useState([]);
-  const [student,     setStudent]     = useState('');
-  const [soundOn,     setSoundOn]     = useState(false);
-  const [micReady,    setMicReady]    = useState(false);
-
-  // 개념 학습
-  const [conceptList, setConceptList] = useState([]);
-  const [conceptIdx,  setConceptIdx]  = useState(0);
-
-  // 퀴즈
-  const [qs,          setQs]          = useState([]);
-  const [qIdx,        setQIdx]        = useState(0);
-  const [fb,          setFb]          = useState(null);
-  const [wrong,       setWrong]       = useState([]);
-  const [history,     setHistory]     = useState([]);
-  const [reviewMode,  setReviewMode]  = useState(false);
-
-  // 별점 & 녹음
-  const [stars,       setStars]       = useState(0);
-  const [recStep,     setRecStep]     = useState('idle');
-  const [recWord,     setRecWord]     = useState('');
-  const [audioUrl,    setAudioUrl]    = useState(null);
-  const [audioB64,    setAudioB64]    = useState(null);
-  const [saving,      setSaving]      = useState(false);
-  const [saved,       setSaved]       = useState(false);
-
-  const mrRef         = useRef(null);
-  const chunksRef     = useRef([]);
-  const permStreamRef = useRef(null);
-
-  /* ── TTS ─────────────────────────────────── */
-  useEffect(() => {
-    if (!soundOn) return;
-    if (phase === 'intro') speak('오늘의 공부 약속! 꾸며주는 말을 넣어 문장을 더 생생하게 만들어봐요!', true);
-    else if (phase === 'concept' && conceptList.length > 0) {
-      const w = conceptList[conceptIdx];
-      if (w) speak(`${w.ex} 이럴 때 쓰는 꾸며주는 말은 "${w.id}". ${w.desc}`, true);
-    }
-    else if (phase === 'activity') {
-      const list = reviewMode ? wrong : qs;
-      const q = list[qIdx];
-      if (q) speak(`${q.before}, 빈칸, ${q.after}. 알맞은 꾸며주는 말을 골라보세요.`, true);
-    }
-    else if (phase === 'self_rating') speak('오늘 꾸며주는 말 공부 어땠나요? 별표를 눌러 알려줘요!', true);
-    else if (phase === 'recording') speak('꾸며주는 말을 넣어 나만의 문장을 만들어 녹음해봐요!', true);
-    else if (phase === 'report') speak('수료증이 나왔어요! 정말 잘했어요!', true);
-  }, [phase, conceptIdx, qIdx, soundOn]);
-
-  /* ── 초기 로드 ────────────────────────────── */
-  useEffect(() => {
-    const init = async () => {
-      let names = [...SAMPLES];
-      if (GAS_URL) {
-        try {
-          const remoteStudents = await gasGet('getStudentList');
-          if (Array.isArray(remoteStudents) && remoteStudents.length > 0) names = remoteStudents;
-          const remoteWords = await gasGet('getWordData');
-          if (Array.isArray(remoteWords) && remoteWords.length > 0) WORD_DB = remoteWords;
-          const remoteQuiz = await gasGet('getQuizData');
-          if (Array.isArray(remoteQuiz) && remoteQuiz.length > 0) QUIZ_Q = remoteQuiz;
-        } catch(_) {}
-      }
-      setStudents(names); setStudent(names[0]);
-      setPhase('start');
-    };
-    init();
-  }, []);
-
-  /* ── 마이크 요청 ──────────────────────────── */
-  const requestMic = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      permStreamRef.current = stream;
-      setMicReady(true);
-    } catch(_) { alert('마이크 권한이 없어요. 브라우저 설정에서 허용해 주세요.'); }
-  };
-
-  /* ── 레벨/문제 수 선택 ────────────────────── */
-  const handleLevel = useCallback((count) => {
-    const shuffled = [...QUIZ_Q].sort(() => Math.random() - .5)
-      .slice(0, Math.min(count, QUIZ_Q.length))
-      .map(q => ({ ...q, opts: [...q.opts].sort(() => Math.random() - .5) }));
-    setQs(shuffled);
-    const picked = [...WORD_DB].sort(() => Math.random() - .5).slice(0, 4);
-    setConceptList(picked);
-    setRecWord(picked[0]?.id || '');
-    setQIdx(0); setFb(null); setWrong([]); setHistory([]);
-    setReviewMode(false); setStars(0);
-    setRecStep('idle'); setAudioUrl(null); setAudioB64(null); setSaved(false);
-    setPhase('concept'); setConceptIdx(0);
-  }, []);
-
-  /* ── 퀴즈 답 체크 ─────────────────────────── */
-  const checkAns = useCallback((ua) => {
-    const list = reviewMode ? wrong : qs;
-    const q = list[qIdx];
-    const ok = ua === q.a;
-    if (!reviewMode) setHistory(h => [...h, { id: q.id, ok, word: q.a, concept: q.concept }]);
-    if (ok) {
-      setFb({ ok: true, msg: q.fb, concept: q.concept });
-      if (reviewMode) setWrong(w => w.filter(x => x.id !== q.id));
-      confetti({ particleCount: 90, spread: 60, origin: { y: .65 } });
-      if (soundOn) speak(q.fb, true);
-    } else {
-      setFb({ ok: false });
-      if (!wrong.find(x => x.id === q.id)) setWrong(w => [...w, q]);
-      if (soundOn) speak('아쉬워요, 다시 생각해볼까요?', true);
-    }
-  }, [reviewMode, wrong, qs, qIdx, soundOn]);
-
-  const nextQ = useCallback(() => {
-    const list = reviewMode ? wrong : qs;
-    setFb(null);
-    if (qIdx < list.length - 1) setQIdx(q => q + 1);
-    else if (reviewMode || wrong.length === 0) setPhase('self_rating');
-    else setPhase('재도전안내');
-  }, [reviewMode, wrong, qs, qIdx]);
-
-  /* ── 녹음 ────────────────────────────────── */
-  const startRec = async () => {
-    try {
-      let stream = permStreamRef.current;
-      if (!stream || stream.getAudioTracks().every(t => t.readyState === 'ended')) {
-        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        permStreamRef.current = stream;
-      }
-      const mr = new MediaRecorder(stream);
-      mrRef.current = mr; chunksRef.current = [];
-      mr.ondataavailable = e => { if (e.data.size > 0) chunksRef.current.push(e.data); };
-      mr.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
-        setAudioUrl(URL.createObjectURL(blob));
-        const fr = new FileReader();
-        fr.readAsDataURL(blob);
-        fr.onloadend = () => { setAudioB64(fr.result.split(',')[1]); setRecStep('done'); };
-      };
-      mr.start(); setRecStep('rec');
-    } catch(_) { alert('마이크를 사용할 수 없어요!'); }
-  };
-  const stopRec = () => {
-    if (mrRef.current && mrRef.current.state !== 'inactive') mrRef.current.stop();
-  };
-
-  /* ── 결과 저장 ────────────────────────────── */
-  const saveResult = async () => {
-    if (saved) { setPhase('report'); return; }
-    setSaving(true); setSaved(true);
-    const learned = [...new Set(history.filter(h => h.ok).map(h => h.word))];
-    const payload = {
-      name: student, total: qs.length,
-      correct: history.filter(h => h.ok).length,
-      words: learned, rating: stars, audioBase64: audioB64
-    };
-    if (window.google?.script?.run) window.google.script.run.saveRecord(payload);
-    else if (GAS_URL) await gasPost(payload);
-    setSaving(false); setPhase('report');
-  };
-
-  const toggleSound = () => setSoundOn(s => !s);
-
-  /* ══════════════════════════════════════════
-     화면 렌더링
-  ══════════════════════════════════════════ */
-
-  /* 로딩 */
-  if (phase === 'loading') return (
-    <div className="w-full h-full flex flex-col items-center justify-center gap-4">
-      <div className="w-20 h-20 border-4 border-green-100 border-t-green-500 rounded-full animate-spin"/>
-      <p className="txt-xl font-black text-slate-400">잠깐만요, 준비 중이에요~</p>
-    </div>
-  );
-
-  /* ── 시작 화면 ──────────────────────────── */
-  if (phase === 'start') return (
-    <div className="w-full h-full flex flex-col items-center justify-center p-6 relative overflow-hidden"
-         style={{background:'linear-gradient(145deg,#f0fdf4 0%,#ecfeff 100%)'}}>
-      <div className="absolute top-6 left-6 opacity-10 float text-8xl">🖊️</div>
-      <div className="absolute bottom-12 right-6 opacity-10 float text-9xl" style={{animationDelay:'.8s'}}>🌿</div>
-
-      <div className="float mb-4"><Mascot size={120}/></div>
-      <h1 className="txt-hero font-black text-slate-900 mb-1 tracking-tight text-center">
-        꾸며주는 말 <span className="text-green-500">탐험대</span> ✨
-      </h1>
-      <p className="txt-xl font-bold text-slate-400 mb-6">문장을 더 생생하게 만들어봐요!</p>
-
-      <div className="card card-green w-full max-w-sm p-7 shadow-xl">
-        <p className="text-center font-black text-green-500 tracking-widest mb-3" style={{fontSize:'1.05rem'}}>📝 내 이름을 골라요</p>
-        <select value={student} onChange={e => setStudent(e.target.value)}
-          className="w-full p-4 mb-4 bg-slate-50 border-2 border-slate-100 rounded-2xl txt-2xl font-black text-slate-800 text-center focus:outline-none focus:border-green-400">
-          {students.map(s => <option key={s} value={s}>{s}</option>)}
-        </select>
-
-        {!micReady ? (
-          <button onClick={requestMic}
-            className="btn w-full py-4 mb-4 bg-green-50 text-green-700 border-2 border-green-200 rounded-2xl font-black txt-xl">
-            🎙️ 마이크 준비하기
-          </button>
-        ) : (
-          <p className="text-center text-emerald-600 font-black txt-xl mb-4">✅ 마이크 준비 완료!</p>
-        )}
-
-        <button onClick={() => { speak(`안녕하세요 ${student}!`, soundOn); setPhase('intro'); }}
-          className="btn w-full py-5 bg-green-500 text-white rounded-2xl font-black txt-3xl shadow-lg hover:bg-green-600">
-          시작하기 ▶
-        </button>
-      </div>
-
-      {/* 소리 토글 */}
-      <button onClick={toggleSound}
-        className={`btn mt-5 w-16 h-16 rounded-2xl border-2 shadow-sm text-3xl ${soundOn ? 'bg-green-100 text-green-600 border-green-200' : 'bg-white text-slate-300 border-slate-100'}`}>
-        {soundOn ? '🔊' : '🔇'}
-      </button>
-    </div>
-  );
-
-  /* ── 인트로 (공부 약속) ────────────────────── */
-  if (phase === 'intro') return (
-    <div className="w-full h-full flex flex-col" style={{background:'#f0fdf4'}}>
-      <Header label="🌿 공부 약속" soundOn={soundOn} toggleSound={toggleSound}/>
-      <div className="flex-1 flex flex-col items-center justify-center text-center px-8 py-4">
-        <div className="inline-block bg-green-100 text-green-700 font-black px-5 py-2 rounded-full mb-5 txt-xl">
-          📝 오늘의 공부 약속
-        </div>
-        <h2 className="txt-4xl font-black text-slate-800 mb-6 leading-tight word-keep">
-          꾸며주는 말을 넣어<br/>
-          <span className="text-green-500">문장을 더 생생하게</span> 만들어봐요!
-        </h2>
-        <div className="card card-green p-6 max-w-lg mb-8 txt-xl font-bold text-slate-500 leading-relaxed word-keep">
-          모양이나 소리를 나타내는 말을 넣으면<br/>문장이 훨씬 재미있어져요!<br/>함께 탐험해볼까요? 🎒
-        </div>
-        <button onClick={() => setPhase('level_select')}
-          className="btn w-full max-w-xs py-5 bg-green-500 text-white rounded-2xl font-black txt-3xl shadow-lg hover:bg-green-600">
-          탐험 시작! ➡️
-        </button>
-      </div>
-    </div>
-  );
-
-  /* ── 레벨 선택 ──────────────────────────── */
-  if (phase === 'level_select') return (
-    <div className="w-full h-full flex flex-col bg-white">
-      <Header label="📚 탐험 수 선택" soundOn={soundOn} toggleSound={toggleSound}/>
-      <div className="flex-1 flex flex-col items-center justify-center px-8 text-center">
-        <h2 className="txt-3xl font-black text-slate-800 mb-3 word-keep">몇 개의 꾸며주는 말을 탐험할까요?</h2>
-        <p className="txt-xl font-bold text-slate-400 mb-8">🌱 쉽게, 🌿 보통, 🌳 도전!</p>
-        <div className="flex flex-col gap-4 w-full max-w-sm">
-          {[[5,'🌱','초보 탐험가'],[10,'🌿','베테랑 탐험가'],[20,'🌳','최강 탐험가']].map(([n,icon,title]) => (
-            <button key={n} onClick={() => handleLevel(n)}
-              className="btn py-6 bg-white border-4 border-green-100 hover:border-green-400 hover:bg-green-50 rounded-3xl txt-2xl font-black text-green-600 shadow-md flex items-center justify-between px-8 gap-4">
-              <span className="text-4xl">{icon}</span>
-              <span className="flex-1 text-left">{n}개 탐험</span>
-              <span className="txt-xl text-slate-400">{title}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-
-  /* ── 개념 학습 ─────────────────────────── */
-  if (phase === 'concept') {
-    const w = conceptList[conceptIdx] || WORD_DB[0];
-    const totalConcept = conceptList.length;
-    return (
-      <div className="w-full h-full flex flex-col" style={{background:'#f8fffb'}}>
-        <Header label={`💡 꾸며주는 말 배우기`} soundOn={soundOn} toggleSound={toggleSound}
-                progress={{current: conceptIdx+1, total: totalConcept}}/>
-        <div className="flex-1 flex flex-col items-center justify-center px-5 py-3">
-          <div className="card card-green w-full max-w-2xl p-8 flex flex-col items-center text-center">
-            {/* 분류 태그 */}
-            <span className={`txt-xl font-black px-5 py-2 rounded-2xl mb-5 ${w.cat==='모양' ? 'bg-green-100 text-green-700' : 'bg-teal-100 text-teal-700'}`}>
-              {w.cat==='모양' ? '👀 모양을 꾸며주는 말' : '👂 소리를 꾸며주는 말'}
-            </span>
-            {/* 예시 문장 */}
-            <div className="bg-green-50 border-2 border-green-100 rounded-2xl p-5 mb-5 w-full">
-              <p className="txt-2xl font-bold text-slate-700 italic word-keep">"{w.ex}"</p>
-            </div>
-            {/* 이모지 + 단어 */}
-            <div className="emoji-xl mb-3 float">{w.emoji}</div>
-            <h3 className="txt-hero font-black text-green-600 mb-2">"{w.id}"</h3>
-            <p className="txt-xl font-bold text-slate-400 word-keep max-w-md">{w.desc}</p>
-          </div>
-          <button onClick={() => {
-            if (conceptIdx < totalConcept - 1) setConceptIdx(c => c+1);
-            else { setQIdx(0); setPhase('activity'); }
-          }}
-            className="btn mt-5 w-full max-w-2xl py-5 rounded-2xl font-black txt-2xl shadow-lg text-white"
-            style={{backgroundColor:'#16a34a'}}>
-            {conceptIdx < totalConcept - 1 ? '다음 설명 보기 ➡️' : '퀴즈 시작하기! 🎯'}
-          </button>
-        </div>
+    /* ── 진행바 ──────────────────────────────── */
+    const ProgressBar = ({ current, total }) => (
+      <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+        <div className="h-full bg-gradient-to-r from-green-400 to-teal-400 rounded-full transition-all duration-500"
+          style={{ width: `${(current / total) * 100}%` }} />
       </div>
     );
-  }
 
-  /* ── 퀴즈 ─────────────────────────────── */
-  if (phase === 'activity') {
-    const list = reviewMode ? wrong : qs;
-    const q = list[qIdx];
-    if (!q) { setPhase('self_rating'); return null; }
-
-    return (
-      <div className="w-full h-full flex flex-col bg-white">
-        <Header label={reviewMode ? '🔄 다시 풀기' : '🧩 꾸며주는 말 퀴즈'} soundOn={soundOn} toggleSound={toggleSound}
-                progress={{current: qIdx+1, total: list.length}}/>
-        <div className="flex-1 flex flex-col items-center justify-center px-5 py-3">
-          <div className="card card-green w-full max-w-2xl p-8 text-center">
-            {!fb ? (
-              <>
-                <div className="emoji-xl mb-4">{q.img}</div>
-                {/* 빈칸 문장 */}
-                <div className="bg-green-50 border-2 border-green-100 rounded-2xl p-5 mb-7">
-                  <p className="txt-3xl font-black text-slate-800 word-keep leading-relaxed">
-                    {q.before}&nbsp;
-                    <span className="inline-block bg-white border-b-4 border-green-400 px-6 py-1 rounded-xl text-green-500 font-black">( ? )</span>
-                    &nbsp;{q.after}
-                  </p>
-                </div>
-                <div className="grid grid-cols-2 gap-5">
-                  {q.opts.map((o,i) => (
-                    <button key={i} onClick={() => checkAns(o)}
-                      className="btn py-8 bg-slate-50 border-3 border-slate-100 hover:border-green-400 hover:bg-green-50 rounded-3xl txt-3xl font-black text-slate-700"
-                      style={{border:'3px solid #f1f5f9'}}>
-                      {o}
-                    </button>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="emoji-xl mb-3">{fb.ok ? '🌟' : '🤔'}</div>
-                <h2 className={`txt-4xl font-black mb-4 ${fb.ok ? 'text-emerald-500' : 'text-amber-500'}`}>
-                  {fb.ok ? '🎉 정답이에요!' : '다시 해볼까요?'}
-                </h2>
-                {fb.ok && (
-                  <>
-                    <div className="bg-emerald-50 border-2 border-emerald-100 rounded-2xl p-5 mb-4 txt-xl font-bold text-slate-600 italic word-keep">{fb.msg}</div>
-                    <div className="bg-green-100 rounded-2xl py-2 px-4 mb-5 inline-block txt-xl font-black text-green-800">📝 {fb.concept}</div>
-                  </>
-                )}
-                <button onClick={fb.ok ? nextQ : () => setFb(null)}
-                  className={`btn w-full py-5 rounded-2xl font-black txt-2xl text-white shadow-lg ${fb.ok ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-amber-400 hover:bg-amber-500'}`}>
-                  {fb.ok ? '다음 문제로 ▶' : '다시 선택하기'}
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  /* ── 재도전 안내 ──────────────────────── */
-  if (phase === '재도전안내') return (
-    <div className="w-full h-full flex flex-col">
-      <Header label="💡 한 번 더!" soundOn={soundOn} toggleSound={toggleSound}/>
-      <div className="flex-1 flex flex-col items-center justify-center text-center px-8">
-        <div className="emoji-xl mb-5">💡</div>
-        <h2 className="txt-4xl font-black text-slate-800 mb-4 word-keep">포기하지 않는 탐험가가<br/>제일 멋져요!</h2>
-        <div className="card card-amber p-6 max-w-md mb-8">
-          <p className="txt-xl font-bold text-slate-600 word-keep">
-            아쉬운 문제를 한 번 더 풀어야<br/>
-            <span className="text-orange-500 font-black">결과를 저장</span>할 수 있어요!
-          </p>
-        </div>
-        <button onClick={() => { setReviewMode(true); setQIdx(0); setFb(null); setPhase('activity'); }}
-          className="btn py-5 px-12 bg-orange-500 text-white rounded-2xl font-black txt-3xl shadow-lg hover:bg-orange-600">
-          🔄 다시 도전!
-        </button>
-      </div>
-    </div>
-  );
-
-  /* ── 별점 자기 평가 ──────────────────── */
-  if (phase === 'self_rating') return (
-    <div className="w-full h-full flex flex-col bg-white">
-      <Header label="⭐ 나의 별점" soundOn={soundOn} toggleSound={toggleSound}/>
-      <div className="flex-1 flex flex-col items-center justify-center px-8 text-center">
-        <h2 className="txt-4xl font-black text-slate-800 mb-3 word-keep">오늘 꾸며주는 말<br/>공부 어땠나요?</h2>
-        <p className="txt-xl font-bold text-slate-400 mb-8">별표를 눌러 내 마음을 알려줘요!</p>
-        <div className="flex gap-3 mb-10 justify-center">
-          {[1,2,3,4,5].map(s => (
-            <button key={s} onClick={() => setStars(s)}
-              className={`btn transition-all duration-200 ${stars >= s ? 'scale-125 drop-shadow-lg' : 'opacity-25 grayscale'}`}
-              style={{fontSize:'clamp(2.5rem,8vw,4rem)'}}>⭐</button>
-          ))}
-        </div>
-        {stars > 0 && (
-          <button onClick={() => setPhase('recording')}
-            className="btn w-full max-w-xs py-5 bg-green-500 text-white rounded-2xl font-black txt-3xl shadow-lg hover:bg-green-600">
-            다음으로 ➡️
+    /* ── 헤더 ──────────────────────────────────── */
+    const Header = ({ label, soundOn, toggleSound, progress }) => (
+      <div className="flex items-center justify-between px-5 py-3 shrink-0 border-b border-slate-100 bg-white/60 backdrop-blur-sm">
+        <div className="flex items-center gap-3">
+          <button onClick={() => window.location.reload()}
+            className="btn flex items-center justify-center w-12 h-12 bg-white rounded-2xl border-2 border-slate-100 text-slate-400 shadow-sm">
+            <HomeIcon />
           </button>
-        )}
-      </div>
-    </div>
-  );
-
-  /* ── 녹음 과제 ────────────────────────── */
-  if (phase === 'recording') {
-    const learnedWords = [...new Set(history.filter(h => h.ok).map(h => h.word))];
-    const displayWords = learnedWords.length > 0 ? learnedWords : WORD_DB.slice(0,4).map(w => w.id);
-    const exWord = WORD_DB.find(w => w.id === recWord) || {};
-
-    return (
-      <div className="w-full h-full flex flex-col" style={{background:'#f0fdf4'}}>
-        <Header label="🎙️ 나만의 문장 만들기" soundOn={soundOn} toggleSound={toggleSound}/>
-        <div className="flex-1 flex flex-col items-center justify-center px-5 py-3">
-          <div className="card card-green w-full max-w-xl p-7">
-            <p className="txt-3xl font-black text-green-600 mb-2 text-center">꾸며주는 말로 문장 만들기!</p>
-            <p className="txt-xl font-bold text-slate-500 mb-4 text-center">단어를 고르고, 그 단어를 넣어 문장을 말해봐요 🎤</p>
-
-            {/* 단어 선택 */}
-            <div className="flex flex-wrap gap-3 justify-center mb-5">
-              {displayWords.map(w => (
-                <button key={w} onClick={() => setRecWord(w)}
-                  className={`btn px-5 py-3 rounded-2xl font-black txt-2xl border-4 transition-all ${recWord===w ? 'bg-green-500 text-white border-green-500 scale-105' : 'bg-white text-green-700 border-green-200'}`}>
-                  {w}
-                </button>
-              ))}
+          <span className="txt-xl font-black text-slate-500 bg-white px-4 py-2 rounded-2xl border border-slate-100 shadow-sm">{label}</span>
+        </div>
+        <div className="flex items-center gap-3">
+          {progress && (
+            <div className="hidden sm:block w-32">
+              <ProgressBar current={progress.current} total={progress.total} />
+              <p className="text-center text-slate-400 font-bold mt-1" style={{ fontSize: '0.85rem' }}>{progress.current}/{progress.total}</p>
             </div>
-
-            {/* 예시 문장 */}
-            {recWord && (
-              <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 mb-5">
-                <p className="font-black text-slate-500 mb-1" style={{fontSize:'1rem'}}>📝 예시 문장</p>
-                <p className="txt-xl font-bold text-amber-700">"{exWord.ex || `나는 ${recWord} 말해봐요.`}"</p>
-                <p className="txt-xl font-bold text-slate-400 mt-2">나만의 문장도 만들어 말해봐요!</p>
-              </div>
-            )}
-
-            {/* 녹음 버튼 */}
-            {recStep === 'idle' && (
-              <button onClick={startRec}
-                className="btn pulse-red w-full py-6 bg-rose-500 text-white rounded-2xl font-black txt-3xl shadow-lg">
-                🔴 녹음 시작!
-              </button>
-            )}
-            {recStep === 'rec' && (
-              <div className="flex flex-col gap-3">
-                <p className="txt-2xl font-black text-rose-500 animate-pulse text-center">🔴 녹음 중... 말해보세요!</p>
-                <button onClick={stopRec}
-                  className="btn w-full py-5 bg-slate-800 text-white rounded-2xl font-black txt-2xl shadow-lg">
-                  ⏹ 다 말했어요!
-                </button>
-              </div>
-            )}
-            {recStep === 'done' && (
-              <div className="flex flex-col gap-4">
-                <p className="txt-2xl font-black text-emerald-600 text-center">✅ 녹음 완료!</p>
-                {audioUrl && <audio controls src={audioUrl} className="w-full rounded-xl"/>}
-                <div className="flex gap-3 mt-1">
-                  <button onClick={() => { setRecStep('idle'); setAudioUrl(null); setAudioB64(null); }}
-                    className="btn flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-bold txt-xl">
-                    🔄 다시하기
-                  </button>
-                  <button onClick={saveResult}
-                    className="btn flex-[2] py-4 bg-green-600 text-white rounded-2xl font-black txt-xl shadow-lg hover:bg-green-700">
-                    제출하기 🏆
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {recStep !== 'rec' && (
-            <button onClick={() => setPhase('report')}
-              className="btn mt-4 text-slate-400 underline font-bold txt-xl">
-              말하기가 쑥스러우면 넘어가도 돼요
-            </button>
           )}
-        </div>
-      </div>
-    );
-  }
-
-  /* ── 수료증 및 결과 ─────────────────────── */
-  if (phase === 'report') {
-    const learned = [...new Set(history.filter(h => h.ok).map(h => h.word))];
-    const correctCount = history.filter(h => h.ok).length;
-    const pct = qs.length > 0 ? Math.round((correctCount / qs.length) * 100) : 100;
-
-    return (
-      <div className="w-full h-full flex flex-col" style={{background:'linear-gradient(145deg,#f0fdf4 0%,#ecfeff 100%)'}}>
-        {saving && (
-          <div className="absolute inset-0 bg-white/90 flex flex-col items-center justify-center z-50 rounded-[2.5rem]">
-            <div className="w-16 h-16 border-4 border-green-100 border-t-green-500 rounded-full animate-spin mb-4"/>
-            <p className="txt-2xl font-black text-slate-700">저장 중이에요...</p>
-          </div>
-        )}
-
-        <div className="flex items-center justify-between px-5 py-3 shrink-0">
-          <h1 className="txt-4xl font-black text-slate-900">🏆 수료증 발급!</h1>
           <button onClick={toggleSound}
             className={`btn w-14 h-14 rounded-2xl border-2 shadow-sm text-3xl ${soundOn ? 'bg-green-100 text-green-600 border-green-200' : 'bg-white text-slate-300 border-slate-100'}`}>
             {soundOn ? '🔊' : '🔇'}
           </button>
         </div>
-
-        {/* 가로 2단 레이아웃 */}
-        <div className="flex gap-4 flex-1 px-5 pb-3 min-h-0">
-          {/* 왼쪽: 인증 카드 */}
-          <div className="card card-green flex-1 p-6 flex flex-col items-center justify-center text-center">
-            <div className="emoji-lg mb-3">📝</div>
-            <h3 className="txt-3xl font-black text-slate-800 mb-2">{student} 탐험가!</h3>
-            <p className="txt-xl font-bold text-slate-500 italic mb-3 leading-relaxed word-keep">
-              꾸며주는 말을 넣어<br/>문장을 멋지게 만드는<br/>실력을 갖추었습니다.
-            </p>
-            <div className="flex gap-1 justify-center mb-3">
-              {[1,2,3,4,5].map(s => <span key={s} style={{fontSize:'clamp(1.5rem,4vw,2.2rem)'}} className={s <= stars ? '' : 'opacity-20 grayscale'}>⭐</span>)}
-            </div>
-            {/* 점수 */}
-            <div className="bg-green-100 rounded-2xl py-2 px-5 inline-block">
-              <span className="txt-xl font-black text-green-700">{correctCount}/{qs.length} 정답 ({pct}%)</span>
-            </div>
-            <p className="font-mono text-slate-300 mt-2" style={{fontSize:'0.9rem'}}>{new Date().toLocaleDateString('ko-KR')}</p>
-          </div>
-
-          {/* 오른쪽: 배운 단어 */}
-          {learned.length > 0 && (
-            <div className="card card-teal flex-1 p-6 flex flex-col">
-              <p className="txt-2xl font-black text-teal-600 mb-4 text-center">✨ 오늘 배운 꾸며주는 말</p>
-              <div className="grid grid-cols-2 gap-3 flex-1 content-center">
-                {learned.map((w,i) => {
-                  const wd = WORD_DB.find(d => d.id === w) || {};
-                  return (
-                    <div key={i} className="bg-teal-50 border-2 border-teal-100 rounded-2xl px-4 py-3 flex items-center gap-2">
-                      <span style={{fontSize:'clamp(1.5rem,4vw,2rem)'}}>{wd.emoji || '✨'}</span>
-                      <span className="txt-xl font-black text-slate-700">{w}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* 버튼 */}
-        <div className="flex gap-4 px-5 pb-5 shrink-0">
-          <button onClick={() => downloadCert(student, learned, stars)}
-            className="btn flex-1 py-5 bg-green-600 text-white rounded-2xl font-black txt-2xl shadow-lg hover:bg-green-700">
-            🖼️ 수료증 저장
-          </button>
-          <button onClick={() => window.location.reload()}
-            className="btn flex-1 py-5 bg-slate-800 text-white rounded-2xl font-black txt-2xl shadow-lg hover:bg-slate-700">
-            🏠 처음으로
-          </button>
-        </div>
       </div>
     );
-  }
 
-  return null;
-};
+    /* ── 연필 마스코트 ────────────────────────── */
+    const Mascot = ({ size = 100 }) => (
+      <svg width={size} height={size * 1.3} viewBox="0 0 100 130" fill="none">
+        <rect x="38" y="10" width="24" height="90" rx="4" fill="#FBBF24" stroke="#92400E" strokeWidth="3" />
+        <rect x="38" y="10" width="24" height="15" rx="3" fill="#FDE68A" />
+        <polygon points="38,100 50,125 62,100" fill="#FCD34D" stroke="#92400E" strokeWidth="2" />
+        <polygon points="44,112 50,125 56,112" fill="#1e293b" />
+        <circle cx="46" cy="58" r="3.5" fill="#1e293b" />
+        <circle cx="54" cy="58" r="3.5" fill="#1e293b" />
+        <circle cx="47" cy="57" r="1" fill="white" />
+        <circle cx="55" cy="57" r="1" fill="white" />
+        <path d="M46 68 Q50 74 54 68" stroke="#92400E" strokeWidth="2.5" strokeLinecap="round" />
+        <path d="M38 40 C20 35 15 65 30 70" stroke="#86EFAC" strokeWidth="5" strokeLinecap="round" fill="none" />
+        <path d="M62 40 C80 35 85 65 70 70" stroke="#86EFAC" strokeWidth="5" strokeLinecap="round" fill="none" />
+      </svg>
+    );
 
-ReactDOM.createRoot(document.getElementById('app')).render(<App/>);
-</script>
+    /* ══════════════════════════════════════════════
+       앱 본체
+    ══════════════════════════════════════════════ */
+    const App = () => {
+      const [phase, setPhase] = useState('loading');
+      const [students, setStudents] = useState([]);
+      const [student, setStudent] = useState('');
+      const [soundOn, setSoundOn] = useState(false);
+      const [micReady, setMicReady] = useState(false);
+
+      // 개념 학습
+      const [conceptList, setConceptList] = useState([]);
+      const [conceptIdx, setConceptIdx] = useState(0);
+
+      // 퀴즈
+      const [qs, setQs] = useState([]);
+      const [qIdx, setQIdx] = useState(0);
+      const [fb, setFb] = useState(null);
+      const [wrong, setWrong] = useState([]);
+      const [history, setHistory] = useState([]);
+      const [reviewMode, setReviewMode] = useState(false);
+
+      // 별점 & 녹음
+      const [stars, setStars] = useState(0);
+      const [recStep, setRecStep] = useState('idle');
+      const [recWord, setRecWord] = useState('');
+      const [audioUrl, setAudioUrl] = useState(null);
+      const [audioB64, setAudioB64] = useState(null);
+      const [saving, setSaving] = useState(false);
+      const [saved, setSaved] = useState(false);
+
+      const mrRef = useRef(null);
+      const chunksRef = useRef([]);
+      const permStreamRef = useRef(null);
+
+      /* ── TTS ─────────────────────────────────── */
+      useEffect(() => {
+        if (!soundOn) return;
+        if (phase === 'intro') speak('오늘의 공부 약속! 꾸며주는 말을 넣어 문장을 더 생생하게 만들어봐요!', true);
+        else if (phase === 'concept' && conceptList.length > 0) {
+          const w = conceptList[conceptIdx];
+          if (w) speak(`${w.ex} 이럴 때 쓰는 꾸며주는 말은 "${w.id}". ${w.desc}`, true);
+        }
+        else if (phase === 'activity') {
+          const list = reviewMode ? wrong : qs;
+          const q = list[qIdx];
+          if (q) speak(`${q.before}, 빈칸, ${q.after}. 알맞은 꾸며주는 말을 골라보세요.`, true);
+        }
+        else if (phase === 'self_rating') speak('오늘 꾸며주는 말 공부 어땠나요? 별표를 눌러 알려줘요!', true);
+        else if (phase === 'recording') speak('꾸며주는 말을 넣어 나만의 문장을 만들어 녹음해봐요!', true);
+        else if (phase === 'report') speak('수료증이 나왔어요! 정말 잘했어요!', true);
+      }, [phase, conceptIdx, qIdx, soundOn]);
+
+      /* ── 초기 로드 ────────────────────────────── */
+      useEffect(() => {
+        const init = async () => {
+          let names = [...SAMPLES];
+          if (GAS_URL) {
+            try {
+              const remoteStudents = await gasGet('getStudentList');
+              if (Array.isArray(remoteStudents) && remoteStudents.length > 0) names = remoteStudents;
+              const remoteWords = await gasGet('getWordData');
+              if (Array.isArray(remoteWords) && remoteWords.length > 0) WORD_DB = remoteWords;
+              const remoteQuiz = await gasGet('getQuizData');
+              if (Array.isArray(remoteQuiz) && remoteQuiz.length > 0) QUIZ_Q = remoteQuiz;
+            } catch (_) { }
+          }
+          setStudents(names); setStudent(names[0]);
+          setPhase('start');
+        };
+        init();
+      }, []);
+
+      /* ── 마이크 요청 ──────────────────────────── */
+      const requestMic = async () => {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          permStreamRef.current = stream;
+          setMicReady(true);
+        } catch (_) { alert('마이크 권한이 없어요. 브라우저 설정에서 허용해 주세요.'); }
+      };
+
+      /* ── 레벨/문제 수 선택 ────────────────────── */
+      const handleLevel = useCallback((count) => {
+        const shuffled = [...QUIZ_Q].sort(() => Math.random() - .5)
+          .slice(0, Math.min(count, QUIZ_Q.length))
+          .map(q => ({ ...q, opts: [...q.opts].sort(() => Math.random() - .5) }));
+        setQs(shuffled);
+        const picked = [...WORD_DB].sort(() => Math.random() - .5).slice(0, 4);
+        setConceptList(picked);
+        setRecWord(picked[0]?.id || '');
+        setQIdx(0); setFb(null); setWrong([]); setHistory([]);
+        setReviewMode(false); setStars(0);
+        setRecStep('idle'); setAudioUrl(null); setAudioB64(null); setSaved(false);
+        setPhase('concept'); setConceptIdx(0);
+      }, []);
+
+      /* ── 퀴즈 답 체크 ─────────────────────────── */
+      const checkAns = useCallback((ua) => {
+        const list = reviewMode ? wrong : qs;
+        const q = list[qIdx];
+        const ok = ua === q.a;
+        if (!reviewMode) setHistory(h => [...h, { id: q.id, ok, word: q.a, concept: q.concept }]);
+        if (ok) {
+          setFb({ ok: true, msg: q.fb, concept: q.concept });
+          if (reviewMode) setWrong(w => w.filter(x => x.id !== q.id));
+          confetti({ particleCount: 90, spread: 60, origin: { y: .65 } });
+          if (soundOn) speak(q.fb, true);
+        } else {
+          setFb({ ok: false });
+          if (!wrong.find(x => x.id === q.id)) setWrong(w => [...w, q]);
+          if (soundOn) speak('아쉬워요, 다시 생각해볼까요?', true);
+        }
+      }, [reviewMode, wrong, qs, qIdx, soundOn]);
+
+      const nextQ = useCallback(() => {
+        const list = reviewMode ? wrong : qs;
+        setFb(null);
+        if (qIdx < list.length - 1) setQIdx(q => q + 1);
+        else if (reviewMode || wrong.length === 0) setPhase('self_rating');
+        else setPhase('재도전안내');
+      }, [reviewMode, wrong, qs, qIdx]);
+
+      /* ── 녹음 ────────────────────────────────── */
+      const startRec = async () => {
+        try {
+          let stream = permStreamRef.current;
+          if (!stream || stream.getAudioTracks().every(t => t.readyState === 'ended')) {
+            stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            permStreamRef.current = stream;
+          }
+          const mr = new MediaRecorder(stream);
+          mrRef.current = mr; chunksRef.current = [];
+          mr.ondataavailable = e => { if (e.data.size > 0) chunksRef.current.push(e.data); };
+          mr.onstop = () => {
+            const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+            setAudioUrl(URL.createObjectURL(blob));
+            const fr = new FileReader();
+            fr.readAsDataURL(blob);
+            fr.onloadend = () => { setAudioB64(fr.result.split(',')[1]); setRecStep('done'); };
+          };
+          mr.start(); setRecStep('rec');
+        } catch (_) { alert('마이크를 사용할 수 없어요!'); }
+      };
+      const stopRec = () => {
+        if (mrRef.current && mrRef.current.state !== 'inactive') mrRef.current.stop();
+      };
+
+      /* ── 결과 저장 ────────────────────────────── */
+      const saveResult = async () => {
+        if (saved) { setPhase('report'); return; }
+        setSaving(true); setSaved(true);
+        const learned = [...new Set(history.filter(h => h.ok).map(h => h.word))];
+        const payload = {
+          name: student, total: qs.length,
+          correct: history.filter(h => h.ok).length,
+          words: learned, rating: stars, audioBase64: audioB64
+        };
+        if (window.google?.script?.run) window.google.script.run.saveRecord(payload);
+        else if (GAS_URL) await gasPost(payload);
+        setSaving(false); setPhase('report');
+      };
+
+      const toggleSound = () => setSoundOn(s => !s);
+
+      /* ══════════════════════════════════════════
+         화면 렌더링
+      ══════════════════════════════════════════ */
+
+      /* 로딩 */
+      if (phase === 'loading') return (
+        <div className="w-full h-full flex flex-col items-center justify-center gap-4">
+          <div className="w-20 h-20 border-4 border-green-100 border-t-green-500 rounded-full animate-spin" />
+          <p className="txt-xl font-black text-slate-400">잠깐만요, 준비 중이에요~</p>
+        </div>
+      );
+
+      /* ── 시작 화면 ──────────────────────────── */
+      if (phase === 'start') return (
+        <div className="w-full h-full flex flex-col items-center justify-center p-6 relative overflow-hidden"
+          style={{ background: 'linear-gradient(145deg,#f0fdf4 0%,#ecfeff 100%)' }}>
+          <div className="absolute top-6 left-6 opacity-10 float text-8xl">🖊️</div>
+          <div className="absolute bottom-12 right-6 opacity-10 float text-9xl" style={{ animationDelay: '.8s' }}>🌿</div>
+
+          <div className="float mb-4"><Mascot size={120} /></div>
+          <h1 className="txt-hero font-black text-slate-900 mb-1 tracking-tight text-center">
+            꾸며주는 말 <span className="text-green-500">탐험대</span> ✨
+          </h1>
+          <p className="txt-xl font-bold text-slate-400 mb-6">문장을 더 생생하게 만들어봐요!</p>
+
+          <div className="card card-green w-full max-w-sm p-7 shadow-xl">
+            <p className="text-center font-black text-green-500 tracking-widest mb-3" style={{ fontSize: '1.05rem' }}>📝 내 이름을 골라요</p>
+            <select value={student} onChange={e => setStudent(e.target.value)}
+              className="w-full p-4 mb-4 bg-slate-50 border-2 border-slate-100 rounded-2xl txt-2xl font-black text-slate-800 text-center focus:outline-none focus:border-green-400">
+              {students.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+
+            {!micReady ? (
+              <button onClick={requestMic}
+                className="btn w-full py-4 mb-4 bg-green-50 text-green-700 border-2 border-green-200 rounded-2xl font-black txt-xl">
+                🎙️ 마이크 준비하기
+              </button>
+            ) : (
+              <p className="text-center text-emerald-600 font-black txt-xl mb-4">✅ 마이크 준비 완료!</p>
+            )}
+
+            <button onClick={() => { speak(`안녕하세요 ${student}!`, soundOn); setPhase('intro'); }}
+              className="btn w-full py-5 bg-green-500 text-white rounded-2xl font-black txt-3xl shadow-lg hover:bg-green-600">
+              시작하기 ▶
+            </button>
+          </div>
+
+          {/* 소리 토글 */}
+          <button onClick={toggleSound}
+            className={`btn mt-5 w-16 h-16 rounded-2xl border-2 shadow-sm text-3xl ${soundOn ? 'bg-green-100 text-green-600 border-green-200' : 'bg-white text-slate-300 border-slate-100'}`}>
+            {soundOn ? '🔊' : '🔇'}
+          </button>
+        </div>
+      );
+
+      /* ── 인트로 (공부 약속) ────────────────────── */
+      if (phase === 'intro') return (
+        <div className="w-full h-full flex flex-col" style={{ background: '#f0fdf4' }}>
+          <Header label="🌿 공부 약속" soundOn={soundOn} toggleSound={toggleSound} />
+          <div className="flex-1 flex flex-col items-center justify-center text-center px-4 sm:px-8 py-4 min-h-0">
+            <div className="inline-block bg-green-100 text-green-700 font-black px-4 sm:px-5 py-2 rounded-full mb-3 sm:mb-5 txt-xl shrink-0">
+              📝 오늘의 공부 약속
+            </div>
+            <h2 className="txt-4xl font-black text-slate-800 mb-4 sm:mb-6 leading-tight word-keep shrink-0">
+              꾸며주는 말을 넣어<br />
+              <span className="text-green-500">문장을 더 생생하게</span> 만들어봐요!
+            </h2>
+            <div className="card card-green p-4 sm:p-6 max-w-xl mx-auto mb-5 sm:mb-8 txt-xl font-bold text-slate-500 leading-relaxed word-keep shrink-0">
+              모양이나 소리를 나타내는 말을 넣으면<br />문장이 훨씬 재미있어져요!<br />함께 탐험해볼까요? 🎒
+            </div>
+            <button onClick={() => setPhase('level_select')}
+              className="btn w-full max-w-sm py-4 sm:py-5 bg-green-500 text-white rounded-2xl font-black txt-3xl shadow-lg hover:bg-green-600 shrink-0">
+              탐험 시작! ➡️
+            </button>
+          </div>
+        </div>
+      );
+
+      /* ── 레벨 선택 ──────────────────────────── */
+      if (phase === 'level_select') return (
+        <div className="w-full h-full flex flex-col bg-white">
+          <Header label="📚 탐험 수 선택" soundOn={soundOn} toggleSound={toggleSound} />
+          <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-8 text-center min-h-0 py-4">
+            <h2 className="txt-3xl font-black text-slate-800 mb-2 sm:mb-3 word-keep shrink-0">몇 개의 꾸며주는 말을 탐험할까요?</h2>
+            <p className="txt-xl font-bold text-slate-400 mb-5 sm:mb-8 shrink-0">🌱 쉽게, 🌿 보통, 🌳 도전!</p>
+            <div className="flex flex-col gap-3 sm:gap-4 w-full max-w-md shrink-0">
+              {[[5, '🌱', '초보 탐험가'], [10, '🌿', '베테랑 탐험가'], [20, '🌳', '최강 탐험가']].map(([n, icon, title]) => (
+                <button key={n} onClick={() => handleLevel(n)}
+                  className="btn py-4 sm:py-6 bg-white border-4 border-green-100 hover:border-green-400 hover:bg-green-50 rounded-3xl txt-2xl font-black text-green-600 shadow-md flex items-center justify-between px-6 sm:px-8 gap-3 sm:gap-4">
+                  <span className="text-4xl">{icon}</span>
+                  <span className="flex-1 text-left">{n}개 탐험</span>
+                  <span className="txt-xl text-slate-400">{title}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+
+      /* ── 개념 학습 ─────────────────────────── */
+      if (phase === 'concept') {
+        const w = conceptList[conceptIdx] || WORD_DB[0];
+        const totalConcept = conceptList.length;
+        return (
+          <div className="w-full h-full flex flex-col" style={{ background: '#f8fffb' }}>
+            <Header label={`💡 꾸며주는 말 배우기`} soundOn={soundOn} toggleSound={toggleSound}
+              progress={{ current: conceptIdx + 1, total: totalConcept }} />
+            <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-5 py-3 min-h-0">
+              <div className="card card-green w-full max-w-2xl p-5 sm:p-8 flex flex-col items-center text-center flex-1 min-h-0 justify-center">
+                {/* 분류 태그 */}
+                <span className={`txt-xl font-black px-4 sm:px-5 py-2 rounded-2xl mb-3 sm:mb-5 shrink-0 ${w.cat === '모양' ? 'bg-green-100 text-green-700' : 'bg-teal-100 text-teal-700'}`}>
+                  {w.cat === '모양' ? '👀 모양을 꾸며주는 말' : '👂 소리를 꾸며주는 말'}
+                </span>
+                {/* 예시 문장 */}
+                <div className="bg-green-50 border-2 border-green-100 rounded-2xl p-4 sm:p-5 mb-3 sm:mb-5 w-full shrink-0">
+                  <p className="txt-2xl font-bold text-slate-700 italic word-keep text-center">"{w.ex}"</p>
+                </div>
+                {/* 이모지 + 단어 */}
+                <div className="flex-1 flex flex-col items-center justify-center min-h-0">
+                  <div className="emoji-xl mb-2 sm:mb-3 float shrink-0">{w.emoji}</div>
+                  <h3 className="txt-hero font-black text-green-600 mb-2 shrink-0">"{w.id}"</h3>
+                  <div className="overflow-y-auto scroll-y w-full px-2" style={{ maxHeight: '20vh' }}>
+                    <p className="txt-xl font-bold text-slate-400 word-keep">{w.desc}</p>
+                  </div>
+                </div>
+              </div>
+              <button onClick={() => {
+                if (conceptIdx < totalConcept - 1) setConceptIdx(c => c + 1);
+                else { setQIdx(0); setPhase('activity'); }
+              }}
+                className="btn mt-4 sm:mt-5 shrink-0 w-full max-w-2xl py-4 sm:py-5 rounded-2xl font-black txt-2xl shadow-lg text-white"
+                style={{ backgroundColor: '#16a34a' }}>
+                {conceptIdx < totalConcept - 1 ? '다음 설명 보기 ➡️' : '퀴즈 시작하기! 🎯'}
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      /* ── 퀴즈 ─────────────────────────────── */
+      if (phase === 'activity') {
+        const list = reviewMode ? wrong : qs;
+        const q = list[qIdx];
+        if (!q) { setPhase('self_rating'); return null; }
+
+        return (
+          <div className="w-full h-full flex flex-col bg-white">
+            <Header label={reviewMode ? '🔄 다시 풀기' : '🧩 꾸며주는 말 퀴즈'} soundOn={soundOn} toggleSound={toggleSound}
+              progress={{ current: qIdx + 1, total: list.length }} />
+            <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-5 py-3 min-h-0">
+              <div className="card card-green w-full max-w-3xl p-5 sm:p-8 text-center flex flex-col flex-1 min-h-0 justify-center">
+                {!fb ? (
+                  <div className="flex flex-col h-full justify-center">
+                    <div className="flex-1 flex flex-col justify-center min-h-0">
+                      <div className="emoji-xl mb-3 sm:mb-4 shrink-0">{q.img}</div>
+                      {/* 빈칸 문장 */}
+                      <div className="bg-green-50 border-2 border-green-100 rounded-2xl p-4 sm:p-5 mb-5 sm:mb-7 shrink-0">
+                        <p className="txt-3xl font-black text-slate-800 word-keep leading-relaxed text-center">
+                          {q.before}&nbsp;
+                          <span className="inline-block bg-white border-b-4 border-green-400 px-3 sm:px-6 py-1 mx-1 rounded-xl text-green-500 font-black" style={{ minWidth: "max-content" }}>( ? )</span>
+                          &nbsp;{q.after}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 sm:gap-5 shrink-0">
+                      {q.opts.map((o, i) => (
+                        <button key={i} onClick={() => checkAns(o)}
+                          className="btn py-4 sm:py-7 bg-slate-50 border-3 border-slate-100 hover:border-green-400 hover:bg-green-50 rounded-3xl txt-3xl font-black text-slate-700"
+                          style={{ border: '3px solid #f1f5f9' }}>
+                          {o}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col h-full justify-center w-full max-w-2xl mx-auto">
+                    <div className="flex-1 flex flex-col justify-center min-h-0 shrink-0">
+                      <div className="emoji-xl mb-2 sm:mb-4">{fb.ok ? '🌟' : '🤔'}</div>
+                      <h2 className={`txt-4xl font-black mb-3 sm:mb-5 ${fb.ok ? 'text-emerald-500' : 'text-amber-500'}`}>
+                        {fb.ok ? '🎉 정답이에요!' : '다시 해볼까요?'}
+                      </h2>
+                      {fb.ok && (
+                        <>
+                          <div className="bg-emerald-50 border-2 border-emerald-100 rounded-2xl p-4 sm:p-6 mb-3 sm:mb-5 txt-xl font-bold text-slate-600 italic word-keep text-center">{fb.msg}</div>
+                          <div className="bg-green-100 rounded-2xl py-2 px-5 mb-4 sm:mb-6 mx-auto w-fit txt-xl font-black text-green-800">📝 {fb.concept}</div>
+                        </>
+                      )}
+                    </div>
+                    <button onClick={fb.ok ? nextQ : () => setFb(null)}
+                      className={`btn w-full py-4 sm:py-5 shrink-0 rounded-2xl font-black txt-2xl text-white shadow-lg ${fb.ok ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-amber-400 hover:bg-amber-500'}`}>
+                      {fb.ok ? '다음 문제로 ▶' : '다시 선택하기'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      /* ── 재도전 안내 ──────────────────────── */
+      if (phase === '재도전안내') return (
+        <div className="w-full h-full flex flex-col">
+          <Header label="💡 한 번 더!" soundOn={soundOn} toggleSound={toggleSound} />
+          <div className="flex-1 flex flex-col items-center justify-center text-center px-4 sm:px-8 py-4 min-h-0">
+            <div className="emoji-xl mb-4 sm:mb-5 shrink-0">💡</div>
+            <h2 className="txt-4xl font-black text-slate-800 mb-3 sm:mb-4 word-keep shrink-0">포기하지 않는 탐험가가<br />제일 멋져요!</h2>
+            <div className="card card-amber p-4 sm:p-6 max-w-md mx-auto mb-5 sm:mb-8 shrink-0">
+              <p className="txt-xl font-bold text-slate-600 word-keep text-center">
+                아쉬운 문제를 한 일 더 풀어야<br className="hidden sm:block" />
+                <span className="text-orange-500 font-black">결과를 저장</span>할 수 있어요!
+              </p>
+            </div>
+            <button onClick={() => { setReviewMode(true); setQIdx(0); setFb(null); setPhase('activity'); }}
+              className="btn py-4 sm:py-5 px-8 sm:px-12 shrink-0 bg-orange-500 text-white rounded-2xl font-black txt-3xl shadow-lg hover:bg-orange-600">
+              🔄 다시 도전!
+            </button>
+          </div>
+        </div>
+      );
+
+      /* ── 별점 자기 평가 ──────────────────── */
+      if (phase === 'self_rating') return (
+        <div className="w-full h-full flex flex-col bg-white">
+          <Header label="⭐ 나의 별점" soundOn={soundOn} toggleSound={toggleSound} />
+          <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-8 text-center min-h-0 py-4">
+            <h2 className="txt-4xl font-black text-slate-800 mb-2 sm:mb-3 word-keep shrink-0">오늘 꾸며주는 말<br />공부 어땠나요?</h2>
+            <p className="txt-xl font-bold text-slate-400 mb-5 sm:mb-8 shrink-0">별표를 눌러 내 마음을 알려줘요!</p>
+            <div className="flex gap-2 sm:gap-3 mb-6 sm:mb-10 justify-center shrink-0">
+              {[1, 2, 3, 4, 5].map(s => (
+                <button key={s} onClick={() => setStars(s)}
+                  className={`btn transition-all duration-200 ${stars >= s ? 'scale-125 drop-shadow-lg' : 'opacity-25 grayscale'}`}
+                  style={{ fontSize: 'clamp(2rem,6vmin,4rem)' }}>⭐</button>
+              ))}
+            </div>
+            {stars > 0 && (
+              <button onClick={() => setPhase('recording')}
+                className="btn w-full max-w-xs py-4 sm:py-5 bg-green-500 text-white rounded-2xl font-black txt-3xl shadow-lg hover:bg-green-600 shrink-0">
+                다음으로 ➡️
+              </button>
+            )}
+          </div>
+        </div>
+      );
+
+      /* ── 녹음 과제 ────────────────────────── */
+      if (phase === 'recording') {
+        const learnedWords = [...new Set(history.filter(h => h.ok).map(h => h.word))];
+        const displayWords = learnedWords.length > 0 ? learnedWords : WORD_DB.slice(0, 4).map(w => w.id);
+        const exWord = WORD_DB.find(w => w.id === recWord) || {};
+
+        return (
+          <div className="w-full h-full flex flex-col" style={{ background: '#f0fdf4' }}>
+            <Header label="🎙️ 나만의 문장 만들기" soundOn={soundOn} toggleSound={toggleSound} />
+            <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-5 py-3 min-h-0">
+              <div className="card card-green w-full max-w-2xl p-4 sm:p-7 flex flex-col flex-1 min-h-0 justify-center shrink-0">
+                <p className="txt-3xl font-black text-green-600 mb-1 sm:mb-2 text-center shrink-0">꾸며주는 말로 문장 만들기!</p>
+                <p className="txt-xl font-bold text-slate-500 mb-3 sm:mb-4 text-center shrink-0">단어를 고르고, 그 단어를 넣어 문장을 말해봐요 🎤</p>
+
+                {/* 단어 선택 */}
+                <div className="flex flex-wrap gap-2 sm:gap-3 justify-center mb-3 sm:mb-5 shrink-0 overflow-y-auto scroll-y max-h-[25vh]">
+                  {displayWords.map(w => (
+                    <button key={w} onClick={() => setRecWord(w)}
+                      className={`btn px-4 sm:px-5 py-2 sm:py-3 rounded-2xl font-black txt-2xl border-4 transition-all ${recWord === w ? 'bg-green-500 text-white border-green-500 scale-105' : 'bg-white text-green-700 border-green-200'}`}>
+                      {w}
+                    </button>
+                  ))}
+                </div>
+
+                {/* 예시 문장 */}
+                {recWord && (
+                  <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-3 sm:p-4 mb-4 sm:mb-5 shrink-0 w-full mx-auto">
+                    <p className="font-black text-slate-500 mb-1 text-center" style={{ fontSize: '1rem' }}>📝 예시 문장</p>
+                    <p className="txt-xl font-bold text-amber-700 text-center word-keep">"{exWord.ex || `나는 ${recWord} 말해봐요.`}"</p>
+                    <p className="txt-lg sm:txt-xl font-bold text-slate-400 mt-1 sm:mt-2 text-center word-keep">나만의 문장도 만들어 말해봐요!</p>
+                  </div>
+                )}
+
+                {/* 녹음 버튼 */}
+                <div className="shrink-0 w-full mx-auto">
+                  {recStep === 'idle' && (
+                    <button onClick={startRec}
+                      className="btn pulse-red w-full py-4 sm:py-6 bg-rose-500 text-white rounded-2xl font-black txt-3xl shadow-lg">
+                      🔴 녹음 시작!
+                    </button>
+                  )}
+                  {recStep === 'rec' && (
+                    <div className="flex flex-col gap-2 sm:gap-3">
+                      <p className="txt-2xl font-black text-rose-500 animate-pulse text-center">🔴 녹음 중... 말해보세요!</p>
+                      <button onClick={stopRec}
+                        className="btn w-full py-4 sm:py-5 bg-slate-800 text-white rounded-2xl font-black txt-2xl shadow-lg">
+                        ⏹ 다 말했어요!
+                      </button>
+                    </div>
+                  )}
+                  {recStep === 'done' && (
+                    <div className="flex flex-col gap-3 sm:gap-4">
+                      <p className="txt-2xl font-black text-emerald-600 text-center">✅ 녹음 완료!</p>
+                      {audioUrl && <audio controls src={audioUrl} className="w-full rounded-xl h-10 sm:h-12" />}
+                      <div className="flex gap-2 sm:gap-3 mt-1">
+                        <button onClick={() => { setRecStep('idle'); setAudioUrl(null); setAudioB64(null); }}
+                          className="btn flex-1 py-3 sm:py-4 bg-slate-100 text-slate-600 rounded-2xl font-bold txt-xl">
+                          🔄 다시하기
+                        </button>
+                        <button onClick={saveResult}
+                          className="btn flex-[2] py-3 sm:py-4 bg-green-600 text-white rounded-2xl font-black txt-xl shadow-lg hover:bg-green-700">
+                          제출하기 🏆
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {recStep !== 'rec' && (
+                <button onClick={() => setPhase('report')}
+                  className="btn mt-3 sm:mt-4 text-slate-400 underline font-bold txt-xl shrink-0">
+                  말하기가 쑥스러우면 넘어가도 돼요
+                </button>
+              )}
+            </div>
+          </div>
+        );
+      }
+
+      /* ── 수료증 및 결과 ─────────────────────── */
+      if (phase === 'report') {
+        const learned = [...new Set(history.filter(h => h.ok).map(h => h.word))];
+        const correctCount = history.filter(h => h.ok).length;
+        const pct = qs.length > 0 ? Math.round((correctCount / qs.length) * 100) : 100;
+
+        return (
+          <div className="w-full h-full flex flex-col" style={{ background: 'linear-gradient(145deg,#f0fdf4 0%,#ecfeff 100%)' }}>
+            {saving && (
+              <div className="absolute inset-0 bg-white/90 flex flex-col items-center justify-center z-50 rounded-[2.5rem]">
+                <div className="w-16 h-16 border-4 border-green-100 border-t-green-500 rounded-full animate-spin mb-4" />
+                <p className="txt-2xl font-black text-slate-700">저장 중이에요...</p>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between px-5 py-3 shrink-0">
+              <h1 className="txt-4xl font-black text-slate-900">🏆 수료증 발급!</h1>
+              <button onClick={toggleSound}
+                className={`btn w-14 h-14 rounded-2xl border-2 shadow-sm text-3xl ${soundOn ? 'bg-green-100 text-green-600 border-green-200' : 'bg-white text-slate-300 border-slate-100'}`}>
+                {soundOn ? '🔊' : '🔇'}
+              </button>
+            </div>
+
+            {/* 가로 2단 레이아웃 */}
+            <div className="flex flex-col md:flex-row gap-3 sm:gap-4 flex-1 px-4 sm:px-5 pb-3 min-h-0">
+              {/* 왼쪽: 인증 카드 */}
+              <div className="card card-green flex-1 p-4 sm:p-6 flex flex-col items-center justify-center text-center shrink-0 min-h-0">
+                <div className="emoji-lg mb-2 sm:mb-3 shrink-0">📝</div>
+                <h3 className="txt-3xl font-black text-slate-800 mb-1 sm:mb-2 shrink-0">{student} 탐험가!</h3>
+                <p className="txt-xl font-bold text-slate-500 italic mb-2 sm:mb-3 leading-relaxed word-keep shrink-0">
+                  꾸며주는 말을 넣어<br />문장을 멋지게 만드는<br />실력을 갖추었습니다.
+                </p>
+                <div className="flex gap-1 justify-center mb-2 sm:mb-3 shrink-0">
+                  {[1, 2, 3, 4, 5].map(s => <span key={s} style={{ fontSize: 'clamp(1.5rem,3vmin,2.2rem)' }} className={s <= stars ? '' : 'opacity-20 grayscale'}>⭐</span>)}
+                </div>
+                {/* 점수 */}
+                <div className="bg-green-100 rounded-2xl py-1.5 sm:py-2 px-4 sm:px-5 inline-block shrink-0">
+                  <span className="txt-xl font-black text-green-700">{correctCount}/{qs.length} 정답 ({pct}%)</span>
+                </div>
+                <p className="font-mono text-slate-300 mt-2 shrink-0" style={{ fontSize: '0.9rem' }}>{new Date().toLocaleDateString('ko-KR')}</p>
+              </div>
+
+              {/* 오른쪽: 배운 단어 */}
+              {learned.length > 0 && (
+                <div className="card card-teal flex-1 p-4 sm:p-6 flex flex-col min-h-0 shrink-0 border-[3px]">
+                  <p className="txt-2xl font-black text-teal-600 mb-3 sm:mb-4 text-center shrink-0">✨ 오늘 배운 꾸며주는 말</p>
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3 flex-1 content-start overflow-y-auto scroll-y pr-1">
+                    {learned.map((w, i) => {
+                      const wd = WORD_DB.find(d => d.id === w) || {};
+                      return (
+                        <div key={i} className="bg-teal-50 border-2 border-teal-100 rounded-2xl px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-center gap-2">
+                          <span style={{ fontSize: 'clamp(1.5rem,3vmin,2rem)' }}>{wd.emoji || '✨'}</span>
+                          <span className="txt-xl font-black text-slate-700">{w}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 버튼 */}
+            <div className="flex gap-3 sm:gap-4 px-4 sm:px-5 pb-4 sm:pb-5 shrink-0">
+              <button onClick={() => downloadCert(student, learned, stars)}
+                className="btn flex-1 py-4 sm:py-5 bg-green-600 text-white rounded-2xl font-black txt-2xl shadow-lg hover:bg-green-700">
+                🖼️ 수료증 저장
+              </button>
+              <button onClick={() => window.location.reload()}
+                className="btn flex-1 py-4 sm:py-5 bg-slate-800 text-white rounded-2xl font-black txt-2xl shadow-lg hover:bg-slate-700">
+                🏠 처음으로
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      return null;
+    };
+
+    ReactDOM.createRoot(document.getElementById('app')).render(<App />);
+  </script>
 </body>
+
 </html>
