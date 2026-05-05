@@ -2,1426 +2,1619 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>겹받침 읽고 쓰기</title>
-<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>꾸며주는 말 탐험대 ✨</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Jua&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
 <style>
-/* ================================
-   Reset & Base
-   ================================ */
-*{box-sizing:border-box;}
-html,body{
-  margin:0;padding:0;width:100vw;height:100vh;overflow:hidden;
-  background:linear-gradient(135deg,#a1c4fd 0%,#c2e9fb 100%);
-  font-family:'Jua',sans-serif;
-  display:flex;justify-content:center;align-items:center;color:#333;
-}
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { width:100%; height:100%; margin:0; padding:0; overflow:hidden; overscroll-behavior:none; }
+  body {
+    font-family: 'Jua', 'Gaegu', 'Malgun Gothic', sans-serif;
+    background: #c7f2d8;
+  }
+  #root { width:100%; height:100%; display:flex; align-items:center; justify-content:center; }
+  #app {
+    width:100%; height:100vh; height:100dvh;
+    display:flex; flex-direction:column; overflow:hidden;
+    background: linear-gradient(160deg,#f0fdf4 0%, #ecfeff 60%, #f0f9ff 100%);
+  }
+  .card { background:#fff; border-radius:1.75rem; box-shadow:0 8px 28px rgba(0,0,0,.07); }
+  .card-green { border:3px solid #bbf7d0; }
+  .card-teal { border:3px solid #99f6e4; }
+  .card-amber { border:3px solid #fde68a; }
+  .card-pink { border:3px solid #fbcfe8; }
+  .card-blue { border:3px solid #bfdbfe; }
+  .word-keep { word-break:keep-all; }
+  .font-handwrite { font-family:'Gaegu','Jua',sans-serif; }
 
-/* ================================
-   Scale Container (1280x800 base)
-   ================================ */
-#app-container{
-  width:1280px;height:800px;
-  background:rgba(255,255,255,0.95);
-  border-radius:30px;
-  box-shadow:0 15px 35px rgba(0,0,0,0.2);
-  position:relative;overflow:hidden;
-  display:flex;flex-direction:column;
-}
+  /* 애니메이션 */
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+  .float { animation: float 3.5s ease-in-out infinite; }
+  @keyframes pulse-btn { 0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4)} 50%{box-shadow:0 0 0 16px rgba(239,68,68,0)} }
+  .pulse-red { animation: pulse-btn 1.5s ease-in-out infinite; }
+  @keyframes wiggle { 0%,100%{transform:rotate(-3deg)} 50%{transform:rotate(3deg)} }
+  .wiggle { animation: wiggle 0.5s ease-in-out infinite; }
+  @keyframes pop-in { 0%{transform:scale(0); opacity:0;} 60%{transform:scale(1.2);} 100%{transform:scale(1); opacity:1;} }
+  .pop-in { animation: pop-in 0.4s ease-out; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+  .shake { animation: shake 0.4s ease-in-out; }
+  @keyframes sticker-burst { 0%{transform:scale(0) rotate(0deg); opacity:0;} 60%{transform:scale(1.3) rotate(20deg); opacity:1;} 100%{transform:scale(1) rotate(0deg); opacity:1;} }
+  .sticker-burst { animation: sticker-burst 0.6s ease-out; }
+  @keyframes highlight-text { 0%{background-color:transparent;} 30%{background-color:#fde68a;} 100%{background-color:transparent;} }
+  .reading-highlight { animation: highlight-text 0.8s ease-out; }
 
-/* ================================
-   Common UI
-   ================================ */
-button{
-  font-family:'Jua',sans-serif;cursor:pointer;border:none;outline:none;
-  transition:transform 0.1s,filter 0.2s;
-}
-button:active{transform:scale(0.95);}
-button:hover{filter:brightness(1.05);}
-button:disabled{cursor:not-allowed;opacity:0.6;}
+  .btn { transition: transform .12s, box-shadow .12s; cursor:pointer; user-select:none; }
+  .btn:active { transform: scale(.95); }
+  .btn:disabled { opacity:0.4; cursor:not-allowed; }
+  .btn:disabled:active { transform: none; }
 
-/* Top Bar */
-.top-bar{
-  height:80px;display:flex;justify-content:space-between;align-items:center;
-  padding:0 30px;background:rgba(255,255,255,0.9);
-  border-bottom:3px solid #e1e1e1;z-index:10;
-}
-.brand{font-size:32px;color:#4facfe;font-weight:bold;}
-.top-bar-right{display:flex;gap:15px;align-items:center;}
-.top-bar-info{
-  font-size:22px;color:#576574;
-  background:#f1f2f6;padding:8px 18px;border-radius:20px;
-}
-.speaker-btn{
-  font-size:36px;background:none;box-shadow:none;
-  width:60px;height:60px;border-radius:50%;
-  display:flex;justify-content:center;align-items:center;
-}
-.speaker-btn.on{background:#feca57;}
+  .scroll-y { overflow-y:auto; -webkit-overflow-scrolling:touch; }
+  .scroll-y::-webkit-scrollbar { width:6px; }
+  .scroll-y::-webkit-scrollbar-thumb { background:#bbf7d0; border-radius:99px; }
 
-/* Scene Area */
-#scene-content{
-  flex:1;display:flex;flex-direction:column;
-  justify-content:center;align-items:center;
-  position:relative;padding:30px;overflow:hidden;
-}
+  /* 🔥 진짜 반응형 — clamp + 컨테이너 단위 (저학년 친화 큰 글씨) */
+  .txt-sm { font-size: clamp(1.05rem, 2.5vmin, 1.25rem); }
+  .txt-md { font-size: clamp(1.2rem, 3vmin, 1.5rem); }
+  .txt-xl { font-size: clamp(1.35rem, 3.5vmin, 1.8rem); }
+  .txt-2xl { font-size: clamp(1.55rem, 4vmin, 2.15rem); }
+  .txt-3xl { font-size: clamp(1.85rem, 4.8vmin, 2.65rem); }
+  .txt-4xl { font-size: clamp(2.2rem, 5.5vmin, 3.15rem); }
+  .txt-hero { font-size: clamp(2.5rem, 6.8vmin, 4rem); }
+  .emoji-md { font-size: clamp(2.2rem, 5.5vmin, 3.8rem); line-height:1.1; }
+  .emoji-lg { font-size: clamp(3rem, 7.5vmin, 5rem); line-height:1.1; }
+  .emoji-xl { font-size: clamp(3.8rem, 9.5vmin, 6.8rem); line-height:1.1; }
 
-/* Stage Title */
-.stage-title{
-  font-size:36px;color:#576574;
-  position:absolute;top:20px;left:50%;transform:translateX(-50%);
-  background:white;padding:8px 25px;border-radius:25px;
-  border:3px solid #4facfe;
-}
+  /* 드래그 영역 */
+  .drag-item { cursor:grab; touch-action:none; }
+  .drag-item:active { cursor:grabbing; }
+  .drag-over { background:#dcfce7 !important; border-color:#22c55e !important; }
 
-/* Buttons */
-.btn-primary{
-  font-size:36px;padding:18px 55px;background:#ff9f43;color:white;
-  border-radius:30px;margin-top:20px;
-  box-shadow:0 6px 18px rgba(255,159,67,0.4);
-}
-.btn-secondary{
-  font-size:26px;padding:12px 32px;background:#00d2d3;color:white;
-  border-radius:22px;margin-top:10px;
-}
-.btn-help{
-  font-size:24px;padding:12px 24px;background:#feca57;color:#222;
-  border-radius:18px;display:inline-flex;align-items:center;gap:8px;
-  box-shadow:0 4px 10px rgba(254,202,87,0.4);
-}
+  /* 칭찬 스티커 */
+  .reward-sticker {
+    position: fixed; top:50%; left:50%;
+    transform: translate(-50%, -50%);
+    pointer-events:none; z-index:9999;
+  }
 
-/* Intro */
-.intro-title{
-  font-size:68px;color:#ff6b6b;margin-bottom:20px;text-align:center;
-  text-shadow:3px 3px 0 #fff;
-}
-.intro-select{
-  font-size:28px;padding:12px 24px;font-family:'Jua',sans-serif;
-  border-radius:18px;border:3px solid #4facfe;background:white;
-  text-align:center;min-width:280px;
-}
+  /* 입력창 */
+  .text-input {
+    font-family:'Gaegu','Jua',sans-serif;
+    font-size: clamp(1.2rem, 3.5vmin, 1.7rem);
+  }
+  .text-input:focus { outline:none; border-color:#22c55e; box-shadow:0 0 0 4px rgba(34,197,94,0.15); }
 
-/* Stage shared */
-.problem-card{
-  background:white;padding:30px 40px 25px;border-radius:25px;
-  border:3px solid #ff9f43;margin-bottom:25px;text-align:center;
-  box-shadow:0 6px 15px rgba(0,0,0,0.08);
-  max-width:1100px;
-}
-.problem-image{
-  font-size:90px;
-  margin-bottom:12px;
-  line-height:1.1;
-  display:block;
-}
-.problem-question{font-size:34px;margin:0 0 15px 0;color:#2c3e50;line-height:1.3;}
-.problem-sound-btn{
-  font-size:24px;padding:10px 22px;background:#f1f2f6;
-  border-radius:18px;color:#3742fa;
-  box-shadow:0 3px 6px rgba(0,0,0,0.1);
-}
-
-/* Choices */
-.choices-container{display:flex;gap:24px;justify-content:center;flex-wrap:wrap;}
-.choice-btn{
-  min-width:180px;height:120px;padding:0 30px;font-size:60px;
-  border-radius:25px;background:#4facfe;color:white;
-  box-shadow:0 6px 15px rgba(0,0,0,0.12);
-}
-.choice-btn.batchim{
-  min-width:160px;width:auto;height:110px;
-  padding:0 25px;font-size:44px;
-  background:#feca57;color:#fff;
-  white-space:nowrap;
-  letter-spacing:2px;
-}
-.choice-btn.pron{background:#ff9f43;font-size:54px;min-width:240px;}
-.choice-btn.pron-alt{background:#4facfe;font-size:54px;min-width:240px;}
-
-/* Stage 2 (Writing) target */
-.problem-box{
-  font-size:88px;letter-spacing:6px;margin:30px 0;color:#222;
-  display:flex;justify-content:center;align-items:center;
-  gap:12px;flex-wrap:nowrap;
-  line-height:1.2;
-}
-.batchim-blank{
-  display:inline-flex;flex-direction:column;
-  justify-content:center;align-items:center;
-  vertical-align:baseline;line-height:1;
-  margin:0 4px;
-}
-.batchim-blank .top{
-  font-size:1em;
-  margin-bottom:4px;
-  letter-spacing:0;
-  line-height:1;
-}
-.batchim-blank .blank{
-  width:0.55em;height:0.55em;
-  border:5px dashed #ff9f43;
-  border-radius:10px;
-  background:#fff9f0;
-  box-sizing:border-box;
-}
-
-/* Stage 4 word card */
-.s4-word-card{
-  font-size:86px;padding:25px 60px;background:white;
-  border:5px dashed #ff9f43;border-radius:30px;margin-bottom:35px;
-}
-
-/* Tutorial bubble */
-.tutorial-bubble{
-  display:inline-block;background:#fff3cd;color:#e15f41;
-  padding:10px 22px;border-radius:18px;font-size:22px;
-  margin-top:15px;box-shadow:0 4px 10px rgba(0,0,0,0.06);
-  border:2px dashed #ff9f43;
-}
-
-/* O/X Feedback */
-.feedback-icon{
-  font-size:240px;position:absolute;top:50%;left:50%;
-  transform:translate(-50%,-50%) scale(0.5);
-  z-index:80;opacity:0;pointer-events:none;transition:0.3s;
-}
-.feedback-icon.show{opacity:1;transform:translate(-50%,-50%) scale(1.2);}
-
-/* Confetti / sticker rain */
-.confetti{
-  position:absolute;width:18px;height:18px;top:-20px;
-  z-index:60;animation:fall 3s linear forwards;
-  font-size:32px;line-height:1;
-}
-@keyframes fall{
-  to{transform:translateY(900px) rotate(720deg);opacity:0;}
-}
-
-/* Reward popup (small floating sticker) */
-.reward-pop{
-  position:absolute;font-size:80px;z-index:70;
-  animation:reward-anim 1.4s ease-out forwards;pointer-events:none;
-}
-@keyframes reward-anim{
-  0%{transform:translate(-50%,-50%) scale(0);opacity:0;}
-  30%{transform:translate(-50%,-50%) scale(1.3);opacity:1;}
-  100%{transform:translate(-50%,-200%) scale(0.8);opacity:0;}
-}
-
-/* ================================
-   Record Overlay
-   ================================ */
-.record-overlay{
-  position:absolute;top:0;left:0;width:100%;height:100%;
-  background:rgba(255,255,255,0.97);
-  display:none;flex-direction:column;justify-content:center;align-items:center;
-  z-index:50;padding:30px;
-}
-.record-overlay.show{display:flex;}
-.record-title{font-size:42px;margin-bottom:10px;color:#2c3e50;text-align:center;}
-.record-word-card{
-  background:white;border:5px solid #4facfe;border-radius:25px;
-  padding:25px 60px;font-size:80px;color:#4facfe;margin-bottom:20px;
-  box-shadow:0 8px 20px rgba(79,172,254,0.25);
-  min-width:300px;text-align:center;
-  /* whiteCard never gets cut */
-  max-width:90%;
-}
-.record-buttons-row{
-  display:flex;gap:18px;align-items:center;flex-wrap:wrap;justify-content:center;
-}
-.record-btn{
-  width:130px;height:130px;border-radius:50%;background:#ff6b6b;color:white;
-  font-size:56px;
-  box-shadow:0 8px 20px rgba(255,107,107,0.4);
-}
-.record-btn:disabled{background:#aaa;}
-.recording-anim{animation:pulse 1s infinite alternate;}
-@keyframes pulse{
-  from{transform:scale(1);}
-  to{transform:scale(1.1);box-shadow:0 0 30px #ff6b6b;}
-}
-.kb-toggle-btn{
-  font-size:22px;padding:12px 22px;background:#48dbfb;color:white;
-  border-radius:18px;
-}
-.help-btn-record{
-  font-size:22px;padding:12px 22px;background:#feca57;color:#222;
-  border-radius:18px;
-}
-.record-tutorial{
-  font-size:22px;line-height:1.4;margin-top:18px;color:#e15f41;
-  background:#fff3cd;padding:12px 22px;border-radius:18px;
-  text-align:center;box-shadow:0 4px 10px rgba(0,0,0,0.06);
-  display:none;
-}
-.record-tutorial.show{display:block;}
-.record-status{
-  font-size:26px;margin-top:18px;color:#555;
-  min-height:50px;text-align:center;
-}
-.stt-preview{
-  background:#fff;padding:8px 20px;border-radius:18px;
-  box-shadow:0 3px 6px rgba(0,0,0,0.1);
-  color:#00d2d3;font-size:32px;font-weight:bold;
-}
-.kb-input-area{
-  display:none;margin-top:15px;flex-direction:column;align-items:center;gap:10px;
-}
-.kb-input-area.show{display:flex;}
-.kb-input-area input{
-  font-size:42px;padding:10px 18px;font-family:'Jua',sans-serif;
-  border:3px solid #1dd1a1;border-radius:18px;text-align:center;width:340px;
-}
-.kb-input-area button{
-  font-size:24px;padding:10px 24px;background:#1dd1a1;color:white;border-radius:18px;
-}
-
-/* Self-eval Overlay */
-.eval-overlay{
-  position:absolute;top:0;left:0;width:100%;height:100%;
-  background:rgba(255,255,255,0.97);
-  display:none;flex-direction:column;justify-content:center;align-items:center;
-  z-index:55;padding:30px;
-}
-.eval-overlay.show{display:flex;}
-.eval-title{font-size:42px;color:#ff6b6b;margin-bottom:8px;text-align:center;}
-.eval-subtitle{font-size:24px;color:#576574;margin-bottom:20px;text-align:center;}
-.eval-playback-btn{
-  font-size:30px;padding:15px 35px;background:#4facfe;color:white;
-  border-radius:25px;margin-bottom:25px;display:flex;align-items:center;gap:10px;
-  box-shadow:0 6px 15px rgba(79,172,254,0.4);
-}
-.stars-row{display:flex;gap:12px;margin-bottom:10px;}
-.star-btn{
-  font-size:64px;background:none;color:#ddd;
-  transition:color 0.15s,transform 0.15s;line-height:1;padding:0;
-}
-.star-btn.active{color:#feca57;text-shadow:0 0 12px rgba(254,202,87,0.6);}
-.eval-text{font-size:26px;color:#555;margin:10px 0 20px 0;min-height:36px;}
-.eval-actions{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;}
-.eval-actions button{
-  font-size:26px;padding:14px 32px;border-radius:22px;
-}
-.btn-redo{background:#ff6b6b;color:white;}
-.btn-next{background:#1dd1a1;color:white;}
-.eval-warn{
-  font-size:22px;color:#e15f41;background:#fff3cd;
-  padding:10px 18px;border-radius:14px;margin-top:10px;
-  display:none;
-}
-.eval-warn.show{display:block;}
-
-/* Help Overlay */
-.help-overlay{
-  position:absolute;top:0;left:0;width:100%;height:100%;
-  background:rgba(0,0,0,0.5);
-  display:none;justify-content:center;align-items:center;z-index:90;padding:30px;
-}
-.help-overlay.show{display:flex;}
-.help-card{
-  background:white;border-radius:25px;padding:35px 45px;max-width:780px;
-  text-align:center;box-shadow:0 15px 30px rgba(0,0,0,0.3);
-}
-.help-card h2{font-size:36px;color:#ff6b6b;margin:0 0 15px;}
-.help-examples{
-  display:flex;flex-direction:column;gap:12px;margin:15px 0 20px;
-}
-.help-ex-row{
-  display:flex;justify-content:space-between;align-items:center;
-  background:#f1f2f6;border-radius:18px;padding:12px 20px;
-}
-.help-ex-row span{font-size:28px;color:#2c3e50;}
-.help-ex-row button{
-  font-size:22px;padding:8px 20px;background:#4facfe;color:white;border-radius:14px;
-}
-.help-close-btn{
-  font-size:26px;padding:12px 30px;background:#576574;color:white;border-radius:20px;
-}
-
-/* Reflection Overlay */
-.reflection-overlay{
-  position:absolute;top:0;left:0;width:100%;height:100%;
-  background:rgba(255,255,255,0.98);
-  display:none;flex-direction:column;justify-content:center;align-items:center;
-  z-index:60;padding:30px;
-}
-.reflection-overlay.show{display:flex;}
-.reflection-title{font-size:48px;color:#4facfe;margin-bottom:18px;}
-.reflection-q{
-  font-size:28px;color:#2c3e50;margin:8px 0;text-align:center;
-  background:#f1f2f6;padding:12px 24px;border-radius:18px;width:80%;
-}
-.reflection-options{
-  display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin:8px 0 18px;
-}
-.reflection-options button{
-  font-size:22px;padding:10px 22px;background:white;color:#576574;
-  border-radius:16px;border:2px solid #ddd;
-}
-.reflection-options button.selected{
-  background:#1dd1a1;color:white;border-color:#1dd1a1;
-}
-
-/* Report */
-.report-container{
-  width:88%;max-height:480px;overflow-y:auto;
-  background:white;border-radius:22px;border:3px solid #ff9f43;
-  padding:18px 22px;box-shadow:0 10px 22px rgba(0,0,0,0.08);
-  margin-bottom:18px;
-}
-.report-item{
-  display:flex;justify-content:space-between;align-items:center;
-  padding:14px 8px;border-bottom:2px dashed #eee;font-size:24px;flex-wrap:wrap;gap:10px;
-}
-.report-item:last-child{border-bottom:none;}
-.report-stars{color:#feca57;font-size:24px;}
-audio.report-audio{height:40px;outline:none;max-width:260px;}
-
-/* Drag review (concept practice) */
-.drag-area{
-  display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin:20px 0;
-}
-.drag-card{
-  font-size:42px;padding:18px 28px;background:#feca57;color:white;
-  border-radius:18px;cursor:grab;box-shadow:0 4px 10px rgba(0,0,0,0.1);
-  user-select:none;
-}
-.drag-card.dragging{opacity:0.5;}
-.drag-slot{
-  font-size:42px;padding:18px 28px;background:#fff;color:#aaa;
-  border-radius:18px;border:4px dashed #4facfe;min-width:140px;text-align:center;
-}
-.drag-slot.over{background:#e3f2fd;}
-.drag-slot.correct{background:#c8e6c9;color:#2c3e50;border-style:solid;}
-.drag-slot.wrong{background:#ffcdd2;color:#c62828;border-style:solid;}
+  /* 글자 단위 하이라이트 */
+  .char-highlight { transition: background-color 0.2s, color 0.2s; padding:1px 2px; border-radius:4px; }
+  .char-highlight.active { background:#fbbf24; color:white; }
 </style>
+
+<script>
+/* ── GAS 웹앱 URL ──────────────────────────── */
+const GAS_URL = "https://script.google.com/macros/s/AKfycbyKRf_2sipDDAIPlLzoMmxZpquaLgEtTEtzAVGSAUvEVMdWi-YlWDfJ2cZnS4SkcPumgQ/exec";
+
+const gasGet = async (action) => {
+  try {
+    const r = await fetch(`${GAS_URL}?action=${action}`, { redirect:'follow' });
+    return JSON.parse(await r.text());
+  } catch(_){ return null; }
+};
+const gasPost = async (data) => {
+  try {
+    await fetch(GAS_URL, {
+      method:'POST', mode:'no-cors',
+      headers:{ 'Content-Type':'text/plain' },
+      body: JSON.stringify(data)
+    });
+  } catch(_){}
+};
+
+/* ── 학생 / 단어 / 퀴즈 기본값 ────────────── */
+const SAMPLES = ['김민준','이하은','박서준','최지아','정수아','한지호'];
+let WORD_DB = [
+  { id:'펄럭펄럭', cat:'모양', emoji:'🦋', desc:'나비나 깃발이 가볍게 흔들리는 모양', ex:'나비가 펄럭펄럭 날아갑니다.' },
+  { id:'쿨쿨', cat:'소리', emoji:'😴', desc:'잠을 깊이 자면서 나는 부드러운 숨소리', ex:'아기가 쿨쿨 자고 있어요.' },
+  { id:'멍멍', cat:'소리', emoji:'🐶', desc:'강아지가 짖을 때 나는 소리', ex:'강아지가 멍멍 짖어요.' },
+  { id:'활짝', cat:'모양', emoji:'🌻', desc:'꽃이나 창문이 크게 열린 모양', ex:'해바라기가 활짝 피었습니다.' },
+  { id:'쌩쌩', cat:'소리', emoji:'🌬️', desc:'바람이 빠르게 지나가는 소리', ex:'바람이 쌩쌩 불어요.' },
+  { id:'반짝반짝', cat:'모양', emoji:'⭐', desc:'별이나 유리창처럼 빛이 나는 모양', ex:'별이 반짝반짝 빛나요.' },
+  { id:'살금살금', cat:'모양', emoji:'🐱', desc:'남이 모르게 조용히 걷는 모양', ex:'고양이가 살금살금 걸어요.' },
+  { id:'알록달록', cat:'모양', emoji:'🎨', desc:'여러 가지 빛깔이 아름답게 섞인 모양', ex:'꽃이 알록달록 예쁘게 피었어요.' },
+  { id:'깡충깡충', cat:'모양', emoji:'🐰', desc:'토끼처럼 발을 모아 가볍게 뛰는 모양', ex:'토끼가 깡충깡충 뛰어요.' },
+  { id:'졸졸', cat:'소리', emoji:'💧', desc:'물이 가늘게 흐르는 소리', ex:'시냇물이 졸졸 흘러요.' },
+];
+let QUIZ_Q = [
+  { id:1, img:'🦋', before:'나비가', after:'날아갑니다.', opts:['펄럭펄럭','쿵쿵'], a:'펄럭펄럭', fb:'맞아요! 나비 날개는 가볍게 펄럭펄럭 움직여요.', concept:'모양을 꾸며주는 말' },
+  { id:2, img:'🇰🇷', before:'태극기가 바람에', after:'휘날립니다.', opts:['펄럭펄럭','살금살금'], a:'펄럭펄럭', fb:'깃발이 바람에 흔들리는 모양도 펄럭펄럭이에요.', concept:'모양을 꾸며주는 말' },
+  { id:3, img:'😴', before:'아기가', after:'자고 있어요.', opts:['쨍그랑','쿨쿨'], a:'쿨쿨', fb:'아기가 깊이 잠든 숨소리는 쿨쿨이에요.', concept:'소리를 꾸며주는 말' },
+  { id:4, img:'🐻', before:'잠꾸러기 곰이', after:'잡니다.', opts:['쿨쿨','반짝반짝'], a:'쿨쿨', fb:'동물들이 깊게 잘 때도 쿨쿨 잔다고 해요.', concept:'소리를 꾸며주는 말' },
+  { id:5, img:'🐶', before:'강아지가', after:'짖어요.', opts:['살금살금','멍멍'], a:'멍멍', fb:'강아지는 씩씩하게 멍멍 하고 짖어요.', concept:'소리를 꾸며주는 말' },
+  { id:6, img:'🐕', before:'누렁이가 꼬리를 흔들며', after:'짖습니다.', opts:['멍멍','졸졸'], a:'멍멍', fb:'강아지 짖는 소리는 멍멍이에요.', concept:'소리를 꾸며주는 말' },
+  { id:7, img:'🌻', before:'해바라기가', after:'피었습니다.', opts:['활짝','엉엉'], a:'활짝', fb:'꽃이 크게 핀 모양은 활짝이라고 해요.', concept:'모양을 꾸며주는 말' },
+  { id:8, img:'😁', before:'친구가 나를 보고', after:'웃었어요.', opts:['활짝','쿨쿨'], a:'활짝', fb:'얼굴 가득 웃음이 피어날 때도 활짝 웃다라고 해요.', concept:'모양을 꾸며주는 말' },
+  { id:9, img:'🌬️', before:'바람이', after:'불어요.', opts:['반짝반짝','쌩쌩'], a:'쌩쌩', fb:'바람이 빠르게 지나가는 소리는 쌩쌩이에요.', concept:'소리를 꾸며주는 말' },
+  { id:10, img:'🚲', before:'자전거가 언덕을', after:'내려갑니다.', opts:['쌩쌩','알록달록'], a:'쌩쌩', fb:'빠르게 달려갈 때도 쌩쌩이라고 표현해요.', concept:'소리를 꾸며주는 말' },
+];
+
+/* ── 🎙️ 자연스러운 한국어 TTS ─────────────── */
+let cachedKoVoice = null;
+const pickKoVoice = () => {
+  if (cachedKoVoice) return cachedKoVoice;
+  const voices = window.speechSynthesis.getVoices();
+  if (!voices.length) return null;
+  // 1순위: Google 클라우드 한국어 (가장 자연스러움)
+  let v = voices.find(x => x.lang === 'ko-KR' && x.name.toLowerCase().includes('google') && !x.localService);
+  // 2순위: Wavenet/Neural2/Premium/Enhanced/Natural
+  if (!v) v = voices.find(x => x.lang === 'ko-KR' && /wavenet|neural|premium|enhanced|natural/i.test(x.name));
+  // 3순위: 그냥 Google 한국어
+  if (!v) v = voices.find(x => x.lang === 'ko-KR' && x.name.toLowerCase().includes('google'));
+  // 4순위: 아무 한국어
+  if (!v) v = voices.find(x => x.lang === 'ko-KR');
+  cachedKoVoice = v || null;
+  return cachedKoVoice;
+};
+// 음성 미리 로드
+if (window.speechSynthesis) {
+  window.speechSynthesis.onvoiceschanged = () => { cachedKoVoice = null; pickKoVoice(); };
+  setTimeout(() => pickKoVoice(), 100);
+}
+
+const speak = (text, on, onEnd) => {
+  if (!on || !window.speechSynthesis) { if (onEnd) onEnd(); return; }
+  window.speechSynthesis.cancel();
+  setTimeout(() => {
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'ko-KR';
+    u.rate = 0.95;   // 자연스럽게
+    u.pitch = 1.0;   // 기본
+    u.volume = 1.0;
+    const v = pickKoVoice();
+    if (v) u.voice = v;
+    if (onEnd) u.onend = onEnd;
+    window.speechSynthesis.speak(u);
+  }, 50);
+};
+
+/* ── 🔊 효과음 (Web Audio API, 외부 파일 X) ── */
+let audioCtx = null;
+const getAudioCtx = () => {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(_){}
+  }
+  return audioCtx;
+};
+const playTone = (freq, duration, type='sine', volume=0.3) => {
+  const ctx = getAudioCtx(); if (!ctx) return;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = type; osc.frequency.value = freq;
+  gain.gain.setValueAtTime(volume, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.start(); osc.stop(ctx.currentTime + duration);
+};
+const sfx = {
+  correct: (on) => { if(!on) return; playTone(523.25,0.12,'sine',0.3); setTimeout(()=>playTone(659.25,0.12,'sine',0.3),100); setTimeout(()=>playTone(783.99,0.18,'sine',0.3),200); },
+  wrong:   (on) => { if(!on) return; playTone(220,0.18,'sawtooth',0.18); setTimeout(()=>playTone(180,0.22,'sawtooth',0.18),150); },
+  click:   (on) => { if(!on) return; playTone(800,0.05,'square',0.1); },
+  reward:  (on) => { if(!on) return; [523.25,659.25,783.99,1046.50].forEach((f,i)=>setTimeout(()=>playTone(f,0.15,'sine',0.25),i*80)); },
+  record:  (on) => { if(!on) return; playTone(440,0.08,'sine',0.2); },
+};
+
+/* ── 수료증 PNG ──────────────────────────── */
+const downloadCert = (name, learned, stars, helpCount) => {
+  const cv = document.createElement('canvas');
+  cv.width = 1200; cv.height = 1500;
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = '#f0fdf4'; ctx.fillRect(0,0,1200,1500);
+  ctx.strokeStyle = '#34d399'; ctx.lineWidth = 40; ctx.strokeRect(40,40,1120,1420);
+  ctx.strokeStyle = '#bbf7d0'; ctx.lineWidth = 15; ctx.strokeRect(70,70,1060,1360);
+  ctx.textAlign = 'center';
+  ctx.font = 'bold 96px sans-serif'; ctx.fillStyle = '#059669';
+  ctx.fillText('✨ 수 료 증 ✨', 600, 220);
+  ctx.font = 'bold 52px sans-serif'; ctx.fillStyle = '#1e293b';
+  ctx.fillText('꾸며주는 말 탐험대', 600, 330);
+  ctx.font = '900 92px sans-serif'; ctx.fillStyle = '#059669';
+  ctx.fillText(`${name} 탐험가`, 600, 510);
+  ctx.font = '50px sans-serif'; ctx.fillStyle = '#475569';
+  ['위 탐험가는 문장을 생생하게 꾸며주는 말을','바르게 사용하는 실력을 갖추었기에','이 수료증을 수여합니다.']
+    .forEach((l,i) => ctx.fillText(l, 600, 680 + i*90));
+  if (stars > 0) {
+    ctx.font = '70px sans-serif';
+    ctx.fillText('⭐'.repeat(stars) + '☆'.repeat(5-stars), 600, 950);
+  }
+  if (learned && learned.length > 0) {
+    ctx.font = 'bold 48px sans-serif'; ctx.fillStyle = '#059669';
+    ctx.fillText('🌿 오늘 배운 꾸며주는 말 🌿', 600, 1080);
+    ctx.font = '44px sans-serif'; ctx.fillStyle = '#1e293b';
+    ctx.fillText(learned.join('  |  '), 600, 1160);
+  }
+  ctx.font = '120px serif'; ctx.fillText('📝✨📝', 600, 1340);
+  ctx.font = 'bold 40px sans-serif'; ctx.fillStyle = '#94a3b8';
+  ctx.fillText(new Date().toLocaleDateString('ko-KR'), 600, 1440);
+  const a = document.createElement('a');
+  a.download = `수료증_${name}.png`;
+  a.href = cv.toDataURL('image/png');
+  a.click();
+};
+</script>
 </head>
 
 <body>
-<div id="app-container">
-  <div class="top-bar">
-    <div class="brand">🌱 겹받침 읽고 쓰기</div>
-    <div class="top-bar-right">
-      <div class="top-bar-info" id="user-info" style="display:none;"></div>
-      <button class="speaker-btn" id="speaker-btn" onclick="toggleSpeaker()" title="소리 켜기/끄기">🔇</button>
+<div id="root"><div id="app"></div></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback, useMemo } = React;
+
+/* ───────────── 공용 컴포넌트 ───────────── */
+const HomeIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+    <polyline points="9 22 9 12 15 12 15 22"/>
+  </svg>
+);
+
+const ProgressBar = ({ current, total }) => (
+  <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+    <div className="h-full bg-gradient-to-r from-green-400 to-teal-400 rounded-full transition-all duration-500"
+      style={{ width: `${(current/total)*100}%` }}/>
+  </div>
+);
+
+const Header = ({ label, soundOn, toggleSound, progress, onHome }) => (
+  <div className="flex items-center justify-between px-3 sm:px-5 py-2 sm:py-3 shrink-0 border-b border-slate-100 bg-white/60 backdrop-blur-sm">
+    <div className="flex items-center gap-2">
+      <button onClick={onHome}
+        className="btn flex items-center justify-center w-11 h-11 sm:w-12 sm:h-12 bg-white rounded-2xl border-2 border-slate-100 text-slate-400 shadow-sm">
+        <HomeIcon />
+      </button>
+      <span className="txt-md font-bold text-slate-500 bg-white px-3 py-2 rounded-2xl border border-slate-100 shadow-sm word-keep">
+        {label}
+      </span>
+    </div>
+    <div className="flex items-center gap-2">
+      {progress && (
+        <div className="hidden md:block w-32">
+          <ProgressBar current={progress.current} total={progress.total}/>
+          <p className="text-center text-slate-500 font-bold mt-1 txt-md">{progress.current}/{progress.total}</p>
+        </div>
+      )}
+      <button onClick={toggleSound}
+        className={`btn w-12 h-12 sm:w-14 sm:h-14 rounded-2xl border-2 shadow-sm txt-2xl ${soundOn ? 'bg-green-100 text-green-600 border-green-200':'bg-white text-slate-300 border-slate-100'}`}>
+        {soundOn ? '🔊' : '🔇'}
+      </button>
     </div>
   </div>
+);
 
-  <div id="scene-content"></div>
+const Mascot = ({ size = 100 }) => (
+  <svg width={size} height={size*1.3} viewBox="0 0 100 130" fill="none">
+    <rect x="38" y="10" width="24" height="90" rx="4" fill="#FBBF24" stroke="#92400E" strokeWidth="3"/>
+    <rect x="38" y="10" width="24" height="15" rx="3" fill="#FDE68A"/>
+    <polygon points="38,100 50,125 62,100" fill="#FCD34D" stroke="#92400E" strokeWidth="2"/>
+    <polygon points="44,112 50,125 56,112" fill="#1e293b"/>
+    <circle cx="46" cy="58" r="3.5" fill="#1e293b"/><circle cx="54" cy="58" r="3.5" fill="#1e293b"/>
+    <circle cx="47" cy="57" r="1" fill="white"/><circle cx="55" cy="57" r="1" fill="white"/>
+    <path d="M46 68 Q50 74 54 68" stroke="#92400E" strokeWidth="2.5" strokeLinecap="round"/>
+    <path d="M38 40 C20 35 15 65 30 70" stroke="#86EFAC" strokeWidth="5" strokeLinecap="round" fill="none"/>
+    <path d="M62 40 C80 35 85 65 70 70" stroke="#86EFAC" strokeWidth="5" strokeLinecap="round" fill="none"/>
+  </svg>
+);
 
-  <!-- O/X Feedback -->
-  <div id="feedback-o" class="feedback-icon" style="color:#1dd1a1;">⭕</div>
-  <div id="feedback-x" class="feedback-icon" style="color:#ff6b6b;">❌</div>
-
-  <!-- Record Overlay -->
-  <div id="record-overlay" class="record-overlay">
-    <h2 class="record-title">🎙️ 큰 소리로 천천히 읽어보세요!</h2>
-    <div id="record-word-card" class="record-word-card">단어</div>
-    <div class="record-buttons-row">
-      <button id="record-btn" class="record-btn" onclick="handleRecordClick()">🎤</button>
-      <button class="kb-toggle-btn" onclick="toggleKeyboardInput()">⌨️ 키보드로 입력</button>
-      <button class="help-btn-record" onclick="openHelp()">🆘 도움받기</button>
+/* ── 칭찬 스티커 보상 애니메이션 ── */
+const RewardSticker = ({ show, type = 'star', onEnd }) => {
+  useEffect(() => {
+    if (!show) return;
+    const t = setTimeout(() => onEnd && onEnd(), 1400);
+    return () => clearTimeout(t);
+  }, [show]);
+  if (!show) return null;
+  const stickers = type === 'heart' ? ['💖','💝','💕','❤️','💗']
+                : type === 'flower' ? ['🌸','🌺','🌷','🌼','🌻']
+                : ['⭐','🌟','✨','💫','⭐'];
+  return (
+    <div className="reward-sticker">
+      <div className="flex gap-3">
+        {stickers.map((s,i) => (
+          <span key={i} className="sticker-burst inline-block"
+            style={{ fontSize:'clamp(3rem,8vmin,5rem)', animationDelay:`${i*0.08}s` }}>{s}</span>
+        ))}
+      </div>
     </div>
-    <div id="kb-input-area" class="kb-input-area">
-      <input id="kb-text" type="text" placeholder="여기에 단어를 써보세요" maxlength="20"/>
-      <button onclick="submitKeyboard()">✅ 입력 완료</button>
-    </div>
-    <div id="record-tutorial" class="record-tutorial">
-      마이크를 누르고 천천히 또박또박 읽어요.<br>
-      아래에 글자가 뜨면 ⏹️ 정지를 눌러요!
-    </div>
-    <div id="record-status" class="record-status">아래 마이크 버튼을 누르면 녹음이 시작됩니다.</div>
-  </div>
-
-  <!-- Self-evaluation Overlay -->
-  <div id="eval-overlay" class="eval-overlay">
-    <h2 class="eval-title">⭐ 스스로 평가해볼까요? ⭐</h2>
-    <div class="eval-subtitle">내 녹음을 들어보고 별을 골라요!</div>
-    <button class="eval-playback-btn" onclick="playMyRecording()">🎧 내 녹음 듣기</button>
-    <div class="stars-row" id="stars-row">
-      <button class="star-btn" data-val="1" onclick="setStars(1)">★</button>
-      <button class="star-btn" data-val="2" onclick="setStars(2)">★</button>
-      <button class="star-btn" data-val="3" onclick="setStars(3)">★</button>
-      <button class="star-btn" data-val="4" onclick="setStars(4)">★</button>
-      <button class="star-btn" data-val="5" onclick="setStars(5)">★</button>
-    </div>
-    <div class="eval-text" id="eval-text">별을 눌러서 점수를 정해요</div>
-    <div class="eval-warn" id="eval-warn">3개 이하예요. 다시 한 번 도전해볼까요?</div>
-    <div class="eval-actions">
-      <button class="btn-redo" onclick="redoRecording()">🔄 다시 녹음하기</button>
-      <button class="btn-next" id="eval-next-btn" onclick="finishEval()" disabled>✅ 다음으로</button>
-    </div>
-  </div>
-
-  <!-- Help Overlay -->
-  <div id="help-overlay" class="help-overlay">
-    <div class="help-card">
-      <h2>🆘 도움이 필요해요!</h2>
-      <div style="font-size:22px;color:#576574;">아래 예시를 들어보고 따라 읽어볼까요?</div>
-      <div class="help-examples" id="help-examples"></div>
-      <button class="help-close-btn" onclick="closeHelp()">알겠어요!</button>
-    </div>
-  </div>
-</div>
-
-<script>
-/* ==========================================================
-   1. Responsive Scale (1280x800 base)
-   ========================================================== */
-function resizeApp(){
-  const c=document.getElementById('app-container');
-  const sx=window.innerWidth/1280;
-  const sy=window.innerHeight/800;
-  const s=Math.min(sx,sy);
-  c.style.transform=`scale(${s})`;
-}
-window.addEventListener('resize',resizeApp);
-resizeApp();
-
-/* ==========================================================
-   2. Global State
-   ========================================================== */
-const GAS_URL=''; // ★ 배포 후 받은 웹앱 URL을 여기에 붙여넣으세요.
-
-let isSpeakerOn=false;
-let currentUser='';
-let learningHistory=[];   // 녹음 기록
-let problemLog=[];        // 문제별 기록 (정답/오답/도움받기)
-
-let appState={
-  students:['학생1','학생2','학생3'],
-  stage1:[
-    {Image:'🐔',Question:'소리는 [닥]이지만 쓸 때는?',SoundText:'꼬끼오~ 닭',Option1:'닥',Option2:'닭',Answer:'닭',Concept:'ㄹㄱ 받침',Feedback:"딩동댕! 소리는 [닥]이지만 쓸 때는 'ㄹㄱ' 받침을 써야 해."},
-    {Image:'🪑',Question:'의자에 편안하게 [안따].',SoundText:'의자에 앉다',Option1:'앉다',Option2:'안다',Answer:'앉다',Concept:'ㄴㅈ 받침',Feedback:"맞아! '안다'는 친구를 안아줄 때 쓰고, 의자에는 '앉다'를 써."},
-    {Image:'8️⃣',Question:'숫자 8은 어떻게 쓸까요?',SoundText:'여덟',Option1:'여덟',Option2:'여덜',Answer:'여덟',Concept:'ㄹㅂ 받침',Feedback:"참 잘했어! 소리는 [여덜]이지만 'ㄹㅂ' 받침이 있는 '여덟'이야."},
-    {Image:'🏷️',Question:'물건의 [갑]을 물어봐요.',SoundText:'얼마예요? 값',Option1:'갑',Option2:'값',Answer:'값',Concept:'ㅂㅅ 받침',Feedback:"훌륭해! 물건의 가격을 뜻할 때는 '값'이라고 써."}
-  ],
-  stage2:[
-    {Image:'🐔',Question:'그림에 알맞은 받침을 골라요.',Word:'닭',Target:'다_',Choices:['ㄱ','ㄹㄱ','ㄴㅈ','ㄹㅂ'],Answer:'ㄹㄱ'},
-    {Image:'🪑',Question:'의자에 편안하게 ___.',Word:'앉다',Target:'아_ 다',Choices:['ㄴ','ㄴㅈ','ㄹㅂ','ㄱㅅ'],Answer:'ㄴㅈ'},
-    {Image:'🏷️',Question:'물건의 ___을 물어봐요.',Word:'값',Target:'가_',Choices:['ㅂ','ㅂㅅ','ㄹㅁ','ㄹㅍ'],Answer:'ㅂㅅ'}
-  ],
-  stage3:[ // 받침 고르기 - 새로 정의 (단순화: 단어보고 받침 종류만 고르기)
-    {Word:'닭',Hint:'ㄷ + ㅏ + ___',Choices:['ㄱ','ㄹㄱ','ㄴㅈ','ㄱㅅ'],Answer:'ㄹㄱ'},
-    {Word:'앉다',Hint:'ㅇ + ㅏ + ___ + 다',Choices:['ㄴ','ㄴㅈ','ㄹㅂ','ㄹㅌ'],Answer:'ㄴㅈ'},
-    {Word:'값',Hint:'ㄱ + ㅏ + ___',Choices:['ㅂ','ㅂㅅ','ㄴㅈ','ㄹㄱ'],Answer:'ㅂㅅ'}
-  ],
-  stage4:[ // 발음 찾기
-    {Word:'맑다',Option1:'[막따]',Option2:'[말따]',Answer:'[막따]'},
-    {Word:'앉다',Option1:'[안자]',Option2:'[안따]',Answer:'[안따]'},
-    {Word:'여덟',Option1:'[여덜]',Option2:'[여덥]',Answer:'[여덜]'}
-  ]
+  );
 };
 
-let currentStage=1;
-let currentIndex=0;
-let problemsPerStage=5;
-
-// 녹음 카운팅: 5문제당 1번 녹음
-let recordTriggerSet=new Set(); // 어느 인덱스에서 녹음할지 미리 정해둠
-
-const contentDiv=document.getElementById('scene-content');
-
-/* ==========================================================
-   3. Audio - Speaker / TTS / SFX
-   ========================================================== */
-let currentAudioElement=null;
-let availableVoices=[];
-let preferredVoice=null;
-
-function loadVoices(){
-  availableVoices=speechSynthesis.getVoices();
-  if(!availableVoices.length) return;
-  // 1순위: Google 한국어 클라우드
-  preferredVoice=availableVoices.find(v=>v.lang==='ko-KR' && v.name.toLowerCase().includes('google') && !v.localService);
-  // 2순위: Wavenet/Neural2
-  if(!preferredVoice){
-    preferredVoice=availableVoices.find(v=>v.lang==='ko-KR' && /wavenet|neural2|neural-?a/i.test(v.name));
-  }
-  // 3순위: premium/enhanced/natural 키워드
-  if(!preferredVoice){
-    preferredVoice=availableVoices.find(v=>v.lang==='ko-KR' && /premium|enhanced|natural/i.test(v.name));
-  }
-  // 4순위: 한국어 아무거나
-  if(!preferredVoice){
-    preferredVoice=availableVoices.find(v=>v.lang==='ko-KR');
-  }
-}
-if('speechSynthesis' in window){
-  loadVoices();
-  speechSynthesis.onvoiceschanged=loadVoices;
-}
-
-function stopAllAudio(){
-  // 다른 재생 시 이전 오디오 정지
-  try{speechSynthesis.cancel();}catch(e){}
-  if(currentAudioElement && !currentAudioElement.paused){
-    try{currentAudioElement.pause();currentAudioElement.currentTime=0;}catch(e){}
-  }
-}
-
-function toggleSpeaker(){
-  isSpeakerOn=!isSpeakerOn;
-  const btn=document.getElementById('speaker-btn');
-  btn.textContent=isSpeakerOn?'🔊':'🔇';
-  btn.classList.toggle('on',isSpeakerOn);
-  if(!isSpeakerOn) stopAllAudio();
-  else playTTS('소리가 켜졌어요!');
-}
-
-function playTTS(text,opts={}){
-  // 자동 안내(force=false)는 스피커가 꺼져있으면 무시
-  // 사용자가 직접 누른 소리 버튼(force=true)은 스피커 상태와 무관하게 재생
-  if(!opts.force && !isSpeakerOn) return;
-  if(!('speechSynthesis' in window)) return;
-  stopAllAudio();
-  // [ ] 대괄호 발음 방지
-  let clean=text.replace(/\[/g,'').replace(/\]/g,'');
-  const ut=new SpeechSynthesisUtterance(clean);
-  ut.lang='ko-KR';
-  if(preferredVoice) ut.voice=preferredVoice;
-  ut.pitch=opts.pitch??1.0;
-  ut.rate=opts.rate??0.95;
-  ut.volume=opts.volume??1.0;
-  speechSynthesis.speak(ut);
-}
-
-// 사용자가 직접 누른 소리 버튼 전용 (스피커 OFF여도 재생)
-function playUserTTS(text){
-  playTTS(text,{force:true});
-}
-
-function playSound(type){
-  if(!isSpeakerOn) return;
-  try{
-    const ctx=new (window.AudioContext||window.webkitAudioContext)();
-    const osc=ctx.createOscillator();
-    const gain=ctx.createGain();
-    osc.connect(gain);gain.connect(ctx.destination);
-    gain.gain.setValueAtTime(0.15,ctx.currentTime);
-    if(type==='correct'){
-      osc.frequency.setValueAtTime(600,ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(1200,ctx.currentTime+0.15);
-      osc.start();osc.stop(ctx.currentTime+0.2);
-    }else if(type==='wrong'){
-      osc.frequency.setValueAtTime(300,ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(150,ctx.currentTime+0.25);
-      osc.start();osc.stop(ctx.currentTime+0.25);
-    }else if(type==='reward'){
-      osc.frequency.setValueAtTime(800,ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(1600,ctx.currentTime+0.3);
-      osc.start();osc.stop(ctx.currentTime+0.3);
-    }
-  }catch(e){}
-}
-
-/* ==========================================================
-   4. Mic Init (앱 시작 시 1회만)
-   ========================================================== */
-let mediaRecorder=null;
-let audioChunks=[];
-let audioBlob=null;
-let audioBase64='';
-let micInitialized=false;
-let micRequested=false; // 이미 시도했는지 (성공/실패 무관)
-
-async function requestMic(){
-  if(micRequested) return;
-  micRequested=true;
-  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-    console.warn('No mic API');
-    return;
-  }
-  try{
-    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
-    mediaRecorder=new MediaRecorder(stream);
-    mediaRecorder.ondataavailable=e=>{if(e.data.size>0) audioChunks.push(e.data);};
-    micInitialized=true;
-    const mb=document.getElementById('init-mic-btn');
-    if(mb){mb.textContent='✅ 마이크 준비 완료';mb.style.background='#1dd1a1';mb.disabled=true;}
-  }catch(e){
-    console.warn('Mic permission denied',e);
-    const mb=document.getElementById('init-mic-btn');
-    if(mb){mb.textContent='⌨️ 키보드로 입력해요';mb.style.background='#feca57';mb.disabled=true;}
-  }
-}
-
-/* ==========================================================
-   5. App Init - GAS Fetch
-   ========================================================== */
-window.onload=()=>{
-  contentDiv.innerHTML=`<h2 style="font-size:48px;color:#576574;">📚 데이터를 불러오는 중...</h2>`;
-  if(GAS_URL && GAS_URL.startsWith('http')){
-    fetch(GAS_URL)
-      .then(res=>res.json())
-      .then(data=>{
-        if(data.success){
-          appState.students=data.students||appState.students;
-          appState.stage1=(data.stage1&&data.stage1.length)?data.stage1:appState.stage1;
-          appState.stage2=(data.stage2&&data.stage2.length)?data.stage2:appState.stage2;
-          appState.stage3=(data.stage3&&data.stage3.length)?data.stage3:appState.stage3;
-          appState.stage4=(data.stage4&&data.stage4.length)?data.stage4:appState.stage4;
-        }
-        renderIntro();
-      })
-      .catch(err=>{console.error(err);renderIntro();});
-  }else{
-    setTimeout(renderIntro,300);
-  }
+/* ── 별점 자기평가 (재사용) ── */
+const StarRating = ({ value, onChange, size = 'normal' }) => {
+  const sz = size === 'large' ? 'clamp(2.5rem,7vmin,4.5rem)' : 'clamp(2rem,5.5vmin,3.5rem)';
+  return (
+    <div className="flex gap-1 sm:gap-2 justify-center">
+      {[1,2,3,4,5].map(s => (
+        <button key={s} onClick={() => onChange(s)}
+          className={`btn transition-all duration-200 ${value >= s ? 'scale-110 drop-shadow-lg':'opacity-25 grayscale'}`}
+          style={{ fontSize: sz }}>⭐</button>
+      ))}
+    </div>
+  );
 };
 
-/* ==========================================================
-   6. Intro
-   ========================================================== */
-function renderIntro(){
-  document.getElementById('user-info').style.display='none';
-  const opts=appState.students.map(s=>`<option value="${s}">${s}</option>`).join('');
-  contentDiv.innerHTML=`
-    <h1 class="intro-title">🎉 겹받침 읽고 쓰기 🎉</h1>
-    <div style="background:white;padding:20px 35px;border-radius:22px;border:4px dashed #4facfe;margin-bottom:25px;font-size:24px;color:#555;text-align:center;max-width:1000px;">
-      <div style="font-weight:bold;color:#4facfe;margin-bottom:8px;font-size:28px;">오늘의 모험 순서 🚀</div>
-      <span style="color:#ff6b6b;">1️⃣ 읽기</span> ➡️
-      <span style="color:#ff9f43;">2️⃣ 쓰기</span> ➡️
-      <span style="color:#feca57;">3️⃣ 받침 고르기</span> ➡️
-      <span style="color:#1dd1a1;">4️⃣ 발음 찾기</span>
-    </div>
-    <div style="font-size:26px;color:#576574;margin-bottom:10px;">이름을 골라요 👇</div>
-    <select id="student-select" class="intro-select">${opts}</select>
-    <br>
-    <button class="btn-secondary" id="init-mic-btn" onclick="requestMic()">🎤 마이크 준비하기</button>
-    <button class="btn-primary" style="background:#1dd1a1;" onclick="goLevelSelect()">▶️ 시작하기</button>
-    <div class="tutorial-bubble">먼저 마이크 버튼을 눌러서 마이크를 준비해요! 💡</div>
-  `;
-  // 음성 우선순위 다시 로딩 시도
-  setTimeout(loadVoices,300);
-}
+/* ───────────── 메인 앱 ───────────── */
+const App = () => {
+  // 단계
+  const [phase, setPhase] = useState('loading');
 
-async function goLevelSelect(){
-  currentUser=document.getElementById('student-select').value;
-  document.getElementById('user-info').style.display='block';
-  document.getElementById('user-info').textContent=`👤 ${currentUser}`;
-  if(!micRequested){
-    await requestMic();
-  }
-  contentDiv.innerHTML=`
-    <div class="intro-title" style="margin-bottom:30px;">📝 문제 개수 선택</div>
-    <div style="font-size:30px;color:#555;margin-bottom:30px;">몇 문제를 풀어볼까요?</div>
-    <div class="choices-container" style="gap:30px;">
-      <button class="btn-primary" style="font-size:42px;padding:30px 36px;background:#feca57;color:#222;" onclick="startWithCount(3)">🌱<br>3개</button>
-      <button class="btn-primary" style="font-size:42px;padding:30px 36px;background:#1dd1a1;" onclick="startWithCount(5)">🌿<br>5개</button>
-      <button class="btn-primary" style="font-size:42px;padding:30px 36px;background:#4facfe;" onclick="startWithCount(10)">🌳<br>10개</button>
-    </div>
-    <div class="tutorial-bubble">처음이면 3개부터 천천히 시작해도 좋아요! 😊</div>
-  `;
-}
+  // 사용자
+  const [students, setStudents] = useState([]);
+  const [student, setStudent] = useState('');
 
-function shuffleSlice(arr,n){
-  const a=[...arr];
-  for(let i=a.length-1;i>0;i--){
-    const j=Math.floor(Math.random()*(i+1));
-    [a[i],a[j]]=[a[j],a[i]];
-  }
-  return a.slice(0,n);
-}
+  // 설정
+  const [soundOn, setSoundOn] = useState(false);  // 기본 OFF
+  const [micReady, setMicReady] = useState(false);
+  const permStreamRef = useRef(null);
 
-function startWithCount(count){
-  if(!appState._original){
-    appState._original={
-      stage1:[...appState.stage1],
-      stage2:[...appState.stage2],
-      stage3:[...appState.stage3],
-      stage4:[...appState.stage4]
+  // 개념 학습
+  const [conceptList, setConceptList] = useState([]);
+  const [conceptIdx, setConceptIdx] = useState(0);
+  const [conceptStep, setConceptStep] = useState('explain'); // 'explain' | 'practice'
+
+  // 개념 연습 (드래그 분류)
+  const [practiceItems, setPracticeItems] = useState([]); // {word, cat, correctCat, placed}
+  const [practiceShake, setPracticeShake] = useState(null);
+  const [practiceFb, setPracticeFb] = useState(null); // 화면 피드백 메시지
+
+  // 퀴즈
+  const [qs, setQs] = useState([]);
+  const [qIdx, setQIdx] = useState(0);
+  const [fb, setFb] = useState(null);
+  const [wrong, setWrong] = useState([]);
+  const [history, setHistory] = useState([]);
+  const [reviewMode, setReviewMode] = useState(false);
+  const [helpUsedThisQ, setHelpUsedThisQ] = useState(false);
+  const [totalHelp, setTotalHelp] = useState(0);
+
+  // 녹음 세션 (5문제마다 1회)
+  const [recSessions, setRecSessions] = useState([]); // 누적 녹음 결과
+  const [currentRecIdx, setCurrentRecIdx] = useState(0);
+  const [recWord, setRecWord] = useState('');
+  const [recStep, setRecStep] = useState('idle'); // idle, rec, done
+  const [audioUrl, setAudioUrl] = useState(null);
+  const [audioB64, setAudioB64] = useState(null);
+  const [sttText, setSttText] = useState('');
+  const [interimText, setInterimText] = useState('');
+  const [typedText, setTypedText] = useState('');
+  const [inputMode, setInputMode] = useState('voice'); // 'voice' | 'keyboard'
+  const [recSelfStars, setRecSelfStars] = useState(0);
+  const [recReadingIdx, setRecReadingIdx] = useState(-1); // 글자 단위 하이라이트
+
+  // 보상
+  const [showReward, setShowReward] = useState(false);
+  const [rewardType, setRewardType] = useState('star');
+  const [stickers, setStickers] = useState([]); // 누적 스티커
+
+  // 최종 평가
+  const [finalStars, setFinalStars] = useState(0);
+  const [reflection, setReflection] = useState({ best:'', hard:'', next:'' });
+  const [reflectionRecState, setReflectionRecState] = useState({ best:'idle', hard:'idle', next:'idle' });
+  const [reflectionInterim, setReflectionInterim] = useState({ best:'', hard:'', next:'' });
+  const reflRecogRef = useRef({});
+
+  // 저장
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  // 녹음 ref
+  const mrRef = useRef(null);
+  const chunksRef = useRef([]);
+  const recogRef = useRef(null);
+
+  /* ── 초기 로드 ─────────────────────── */
+  useEffect(() => {
+    const init = async () => {
+      let names = [...SAMPLES];
+      if (GAS_URL) {
+        try {
+          const rs = await gasGet('getStudentList');
+          if (Array.isArray(rs) && rs.length>0) names = rs;
+          const rw = await gasGet('getWordData');
+          if (Array.isArray(rw) && rw.length>0) WORD_DB = rw;
+          const rq = await gasGet('getQuizData');
+          if (Array.isArray(rq) && rq.length>0) QUIZ_Q = rq;
+        } catch(_){}
+      }
+      setStudents(names);
+      setStudent(names[0]);
+      setPhase('start');
     };
-  }
-  problemsPerStage=count;
-  appState.stage1=shuffleSlice(appState._original.stage1,count);
-  appState.stage2=shuffleSlice(appState._original.stage2,count);
-  appState.stage3=shuffleSlice(appState._original.stage3,count);
-  appState.stage4=shuffleSlice(appState._original.stage4,count);
-  // 녹음 트리거 위치: 문제 인덱스 4, 9 (=5번째, 10번째 문제 풀고 나서)
-  recordTriggerSet=new Set();
-  // 5문제당 1번: 4(5번째 종료), 9(10번째 종료)
-  for(let i=4;i<count;i+=5){
-    recordTriggerSet.add(i);
-  }
-  // 만약 count<5인 경우 (3) 마지막 문제에서 1번 녹음
-  if(count<5) recordTriggerSet.add(count-1);
-  
-  learningHistory=[];
-  problemLog=[];
-  startStage(1);
-}
+    init();
+  }, []);
 
-function startStage(stage){
-  currentStage=stage;
-  currentIndex=0;
-  if(stage===1) renderStage1();
-  else if(stage===2) renderStage2();
-  else if(stage===3) renderStage3();
-  else if(stage===4) renderStage4();
-}
-
-/* ==========================================================
-   7. Feedback / Reward / Confetti
-   ========================================================== */
-function showFeedbackOverlay(isCorrect,callback){
-  const el=isCorrect?document.getElementById('feedback-o'):document.getElementById('feedback-x');
-  el.classList.add('show');
-  playSound(isCorrect?'correct':'wrong');
-  setTimeout(()=>{
-    el.classList.remove('show');
-    if(callback) callback();
-  },1000);
-}
-
-function rainConfetti(){
-  const stickers=['⭐','✨','🌟','💖','🌸','🎉','🎊','🌈','🦄','🍀'];
-  for(let i=0;i<70;i++){
-    const c=document.createElement('div');
-    c.className='confetti';
-    c.style.left=Math.random()*100+'%';
-    c.style.animationDelay=(Math.random()*2)+'s';
-    c.textContent=stickers[Math.floor(Math.random()*stickers.length)];
-    document.getElementById('app-container').appendChild(c);
-    setTimeout(()=>c.remove(),3500);
-  }
-}
-
-function showRewardPop(emoji='⭐'){
-  const pop=document.createElement('div');
-  pop.className='reward-pop';
-  pop.textContent=emoji;
-  pop.style.left=(40+Math.random()*20)+'%';
-  pop.style.top=(40+Math.random()*20)+'%';
-  document.getElementById('app-container').appendChild(pop);
-  playSound('reward');
-  setTimeout(()=>pop.remove(),1400);
-}
-
-/* ==========================================================
-   8. Logging (LocalHistory + GAS POST)
-   ========================================================== */
-function logToSheet(payload){
-  if(!GAS_URL || !GAS_URL.startsWith('http')) return;
-  fetch(GAS_URL,{
-    method:'POST',
-    headers:{'Content-Type':'text/plain'},
-    body:JSON.stringify(payload)
-  }).then(r=>r.json()).then(d=>console.log('Saved',d)).catch(e=>console.warn(e));
-}
-
-function logProblemResult(stageNum,word,question,chosen,isCorrect,helpUsed){
-  const payload={
-    type:'problem',
-    student:currentUser,stage:stageNum,word:word,question:question,
-    chosen:chosen,isCorrect:isCorrect?'O':'X',
-    helpUsed:helpUsed?'O':'X',
-    timestamp:new Date().toISOString()
-  };
-  problemLog.push(payload);
-  logToSheet(payload);
-}
-
-function logRecording(word,stars,sttText,redoCount){
-  const payload={
-    type:'recording',
-    student:currentUser,stage:currentStage,word:word,
-    sttText:sttText||'',stars:stars,redoCount:redoCount,
-    audioBase64:audioBase64,audioType:'audio/webm',
-    timestamp:new Date().toISOString()
-  };
-  // 로컬 보관
-  learningHistory.push({
-    word:word,stars:stars,sttText:sttText,redoCount:redoCount,
-    audioBlob:audioBlob && audioBlob.size>0?audioBlob:null,
-    stage:currentStage
-  });
-  logToSheet(payload);
-}
-
-function logReflection(reflection){
-  logToSheet({
-    type:'reflection',
-    student:currentUser,reflection:reflection,
-    timestamp:new Date().toISOString()
-  });
-}
-
-/* ==========================================================
-   9. Stage Transitions
-   ========================================================== */
-function renderStageTransition(nextStage,title,emoji){
-  playTTS(`훌륭해요! 다음은 ${nextStage}단계, ${title}입니다.`);
-  showRewardPop('🏆');
-  contentDiv.innerHTML=`
-    <h2 style="font-size:72px;color:#ff9f43;margin-bottom:20px;">🎉 잘했어요! 🎉</h2>
-    <div style="background:white;padding:35px 50px;border-radius:30px;border:4px solid #1dd1a1;box-shadow:0 10px 22px rgba(0,0,0,0.1);margin-bottom:30px;text-align:center;">
-      <div style="font-size:28px;color:#7f8c8d;margin-bottom:10px;">다음 미션</div>
-      <div style="font-size:52px;color:#2c3e50;font-weight:bold;">${emoji} ${nextStage}단계: ${title}</div>
-    </div>
-    <button class="btn-primary" style="background:#4facfe;font-size:36px;padding:18px 50px;" onclick="startStage(${nextStage})">▶️ ${nextStage}단계 시작!</button>
-  `;
-}
-
-/* ==========================================================
-   10. Stage 1 - 읽기 (소리 듣고 글자 고르기)
-   ========================================================== */
-function renderStage1(){
-  if(currentIndex>=appState.stage1.length){
-    // 단계 끝 - 마지막에 녹음이면 처리 후 다음 단계
-    return goNextAfterStage(1);
-  }
-  const p=appState.stage1[currentIndex];
-  playTTS(`${currentIndex+1}번째 문제. ${p.Question}`);
-  contentDiv.innerHTML=`
-    <div class="stage-title">🔊 1단계: 읽기 (${currentIndex+1}/${appState.stage1.length})</div>
-    <div class="problem-card">
-      <div class="problem-image">${p.Image}</div>
-      <h2 class="problem-question">${p.Question}</h2>
-      <button class="problem-sound-btn" onclick="playUserTTS('${p.SoundText.replace(/'/g,"\\'")}')">🔊 소리 듣기</button>
-      <button class="btn-help" style="margin-left:8px;" onclick="openHelp()">🆘 도움받기</button>
-    </div>
-    <div class="choices-container">
-      <button class="choice-btn" onclick="checkStage1('${p.Option1}')">${p.Option1}</button>
-      <button class="choice-btn" onclick="checkStage1('${p.Option2}')">${p.Option2}</button>
-    </div>
-    <div class="tutorial-bubble">소리를 들어보고 알맞은 글자를 골라요 🌟</div>
-  `;
-}
-
-function checkStage1(sel){
-  const p=appState.stage1[currentIndex];
-  const ok=(sel===p.Answer);
-  if(!ok){
-    showFeedbackOverlay(false);
-    playTTS('다시 한 번 생각해볼까요?');
-    return;
-  }
-  logProblemResult(1,p.Answer,p.Question,sel,true,helpUsedThisProblem);
-  helpUsedThisProblem=false;
-  showFeedbackOverlay(true,()=>{
-    showRewardPop('⭐');
-    playTTS(p.Feedback);
-    setTimeout(()=>{
-      maybeRecordOrNext(p.Answer,()=>{
-        currentIndex++;
-        renderStage1();
-      });
-    },1200);
-  });
-}
-
-/* ==========================================================
-   11. Stage 2 - 쓰기 (받침 채우기)
-   ========================================================== */
-function formatBlank(targetStr){
-  if(!targetStr) return '';
-  // "다_" → 다 + 빈칸
-  return targetStr.replace(/([가-힣])_/g,
-    `<span class="batchim-blank"><span class="top">$1</span><span class="blank"></span></span>`);
-}
-
-function renderStage2(){
-  if(currentIndex>=appState.stage2.length){
-    return goNextAfterStage(2);
-  }
-  const p=appState.stage2[currentIndex];
-  playTTS(`${currentIndex+1}번째 문제. ${p.Question}`);
-  let choiceHTML='';
-  p.Choices.forEach(c=>{
-    choiceHTML+=`<button class="choice-btn batchim" onclick="checkStage2('${c}')">${c}</button>`;
-  });
-  contentDiv.innerHTML=`
-    <div class="stage-title">✏️ 2단계: 쓰기 (${currentIndex+1}/${appState.stage2.length})</div>
-    <div class="problem-card">
-      <div class="problem-image">${p.Image||'📝'}</div>
-      <h2 class="problem-question">${p.Question||'알맞은 받침을 골라보세요.'}</h2>
-      <button class="btn-help" onclick="openHelp()">🆘 도움받기</button>
-    </div>
-    <div class="problem-box">${formatBlank(p.Target)}</div>
-    <div class="choices-container">${choiceHTML}</div>
-    <div class="tutorial-bubble">빈칸에 알맞은 받침을 골라요! ✏️</div>
-  `;
-}
-
-function checkStage2(sel){
-  const p=appState.stage2[currentIndex];
-  const ok=(sel===p.Answer);
-  if(!ok){
-    showFeedbackOverlay(false);
-    playTTS('다시 생각해봐요. 빈칸에 어떤 받침이 들어갈까요?');
-    return;
-  }
-  logProblemResult(2,p.Word,p.Question,sel,true,helpUsedThisProblem);
-  helpUsedThisProblem=false;
-  // 정답 표시
-  const pb=document.querySelector('.problem-box');
-  if(pb){pb.innerHTML=p.Word;pb.style.color='#1dd1a1';}
-  showFeedbackOverlay(true,()=>{
-    showRewardPop('🌟');
-    playTTS(`정답이에요! ${p.Word}!`);
-    setTimeout(()=>{
-      maybeRecordOrNext(p.Word,()=>{
-        currentIndex++;
-        renderStage2();
-      });
-    },1000);
-  });
-}
-
-/* ==========================================================
-   12. Stage 3 - 받침 고르기 (단어 통째 보고 받침 종류 고르기)
-   ========================================================== */
-function renderStage3(){
-  if(currentIndex>=appState.stage3.length){
-    return goNextAfterStage(3);
-  }
-  const p=appState.stage3[currentIndex];
-  playTTS(`${currentIndex+1}번째 문제. ${p.Word}의 받침을 골라보세요.`);
-  let choiceHTML='';
-  p.Choices.forEach(c=>{
-    choiceHTML+=`<button class="choice-btn batchim" onclick="checkStage3('${c}')">${c}</button>`;
-  });
-  contentDiv.innerHTML=`
-    <div class="stage-title">🎯 3단계: 받침 고르기 (${currentIndex+1}/${appState.stage3.length})</div>
-    <div class="problem-card">
-      <div style="font-size:78px;color:#2c3e50;">${p.Word}</div>
-      <div style="font-size:28px;color:#576574;margin-top:10px;">${p.Hint||''}</div>
-      <button class="btn-help" style="margin-top:15px;" onclick="openHelp()">🆘 도움받기</button>
-    </div>
-    <div class="choices-container">${choiceHTML}</div>
-    <div class="tutorial-bubble">단어 속에 숨은 겹받침을 찾아요! 🎯</div>
-  `;
-}
-
-function checkStage3(sel){
-  const p=appState.stage3[currentIndex];
-  const ok=(sel===p.Answer);
-  if(!ok){
-    showFeedbackOverlay(false);
-    playTTS('다시 한 번 봐볼까요?');
-    return;
-  }
-  logProblemResult(3,p.Word,'받침 고르기',sel,true,helpUsedThisProblem);
-  helpUsedThisProblem=false;
-  showFeedbackOverlay(true,()=>{
-    showRewardPop('🎯');
-    playTTS(`맞아요! ${p.Word}의 받침은 ${p.Answer}이에요.`);
-    setTimeout(()=>{
-      maybeRecordOrNext(p.Word,()=>{
-        currentIndex++;
-        renderStage3();
-      });
-    },1000);
-  });
-}
-
-/* ==========================================================
-   13. Stage 4 - 발음 찾기
-   ========================================================== */
-function renderStage4(){
-  if(currentIndex>=appState.stage4.length){
-    return goNextAfterStage(4);
-  }
-  const p=appState.stage4[currentIndex];
-  const phon=p.Answer.replace(/\[|\]/g,'');
-  playTTS(`${currentIndex+1}번째 문제. ${p.Word}는 어떻게 발음할까요?`);
-  contentDiv.innerHTML=`
-    <div class="stage-title">👂 4단계: 발음 찾기 (${currentIndex+1}/${appState.stage4.length})</div>
-    <div class="s4-word-card">${p.Word}</div>
-    <div style="font-size:24px;color:#576574;margin-bottom:20px;">올바른 발음을 골라요</div>
-    <div class="choices-container">
-      <button class="choice-btn pron" onclick="checkStage4('${p.Option1}')">${p.Option1}</button>
-      <button class="choice-btn pron-alt" onclick="checkStage4('${p.Option2}')">${p.Option2}</button>
-    </div>
-    <button class="btn-help" style="margin-top:20px;" onclick="openHelp()">🆘 도움받기</button>
-    <div class="tutorial-bubble">잘 모르겠으면 도움받기를 눌러요 🆘</div>
-  `;
-}
-
-function checkStage4(sel){
-  const p=appState.stage4[currentIndex];
-  const ok=(sel===p.Answer);
-  if(!ok){
-    showFeedbackOverlay(false);
-    playTTS('이 단어는 어떻게 소리나는지 다시 생각해봐요.');
-    return;
-  }
-  logProblemResult(4,p.Word,'발음 찾기',sel,true,helpUsedThisProblem);
-  helpUsedThisProblem=false;
-  showFeedbackOverlay(true,()=>{
-    showRewardPop('🎵');
-    playTTS(`${p.Word}는 ${p.Answer.replace(/\[|\]/g,'')}로 발음해요.`);
-    setTimeout(()=>{
-      maybeRecordOrNext(p.Word,()=>{
-        currentIndex++;
-        renderStage4();
-      });
-    },1000);
-  });
-}
-
-/* ==========================================================
-   14. 녹음 트리거 - 5문제마다 1번
-   ========================================================== */
-function maybeRecordOrNext(wordToRecord,nextCallback){
-  // 현재 단계에서 녹음을 해야 할 인덱스인지 확인
-  if(recordTriggerSet.has(currentIndex)){
-    openRecordOverlay(wordToRecord,nextCallback);
-  }else{
-    nextCallback();
-  }
-}
-
-function goNextAfterStage(stageDone){
-  if(stageDone===1) renderStageTransition(2,'쓰기','✏️');
-  else if(stageDone===2) renderStageTransition(3,'받침 고르기','🎯');
-  else if(stageDone===3) renderStageTransition(4,'발음 찾기','👂');
-  else if(stageDone===4) renderReflection();
-}
-
-/* ==========================================================
-   15. Help (도움받기)
-   ========================================================== */
-let helpUsedThisProblem=false;
-
-const helpExamples=[
-  {word:'닭',sentence:'마당에 닭이 꼬꼬댁 울어요.'},
-  {word:'앉다',sentence:'의자에 바르게 앉다.'},
-  {word:'여덟',sentence:'사과 여덟 개를 셌어요.'},
-  {word:'값',sentence:'사과 값이 얼마예요?'},
-  {word:'몫',sentence:'네 몫은 잊지 않을게.'},
-  {word:'삶다',sentence:'달걀을 맛있게 삶다.'},
-  {word:'넓다',sentence:'운동장이 아주 넓다.'},
-  {word:'밟다',sentence:'낙엽을 사뿐히 밟다.'},
-  {word:'핥다',sentence:'아이스크림을 살짝 핥다.'},
-  {word:'읊다',sentence:'시를 천천히 읊다.'}
-];
-
-function openHelp(){
-  helpUsedThisProblem=true;
-  // 문제 단어와 관련 예시 우선 보여주기
-  let curWord='';
-  if(currentStage===1) curWord=appState.stage1[currentIndex]?.Answer;
-  else if(currentStage===2) curWord=appState.stage2[currentIndex]?.Word;
-  else if(currentStage===3) curWord=appState.stage3[currentIndex]?.Word;
-  else if(currentStage===4) curWord=appState.stage4[currentIndex]?.Word;
-
-  // 단어 매칭, 없으면 랜덤 3개
-  let matched=helpExamples.find(h=>h.word===curWord);
-  let picks=[];
-  if(matched) picks.push(matched);
-  // 추가로 2개 채우기
-  const others=helpExamples.filter(h=>h!==matched);
-  while(picks.length<3 && others.length){
-    const idx=Math.floor(Math.random()*others.length);
-    picks.push(others.splice(idx,1)[0]);
-  }
-  let html='';
-  picks.forEach(p=>{
-    html+=`<div class="help-ex-row"><span>${p.sentence}</span>
-      <button onclick="playUserTTS('${p.sentence.replace(/'/g,"\\'")}')">🔊 들어보기</button></div>`;
-  });
-  document.getElementById('help-examples').innerHTML=html;
-  document.getElementById('help-overlay').classList.add('show');
-}
-
-function closeHelp(){
-  document.getElementById('help-overlay').classList.remove('show');
-}
-
-/* ==========================================================
-   16. Record Overlay
-   ========================================================== */
-let recordState=0;
-let finishRecordCallback=null;
-let finalTranscript='';
-let recognition=null;
-let currentRecordWord='';
-let currentRedoCount=0;
-
-if('webkitSpeechRecognition' in window || 'SpeechRecognition' in window){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  recognition=new SR();
-  recognition.lang='ko-KR';
-  recognition.interimResults=true;
-  recognition.continuous=true;
-  recognition.onresult=function(e){
-    let s='';
-    for(let i=0;i<e.results.length;i++) s+=e.results[i][0].transcript;
-    finalTranscript=s;
-    const st=document.getElementById('record-status');
-    if(st && recordState===1){
-      st.innerHTML=`<span style="color:#555;">받아쓰는 중 ➡️</span> <span class="stt-preview">${finalTranscript}</span>`;
+  /* ── 마이크 1회 권한 ─────────────────── */
+  const requestMic = async () => {
+    try {
+      // 이미 허용된 경우 스킵
+      if (navigator.permissions) {
+        try {
+          const p = await navigator.permissions.query({ name: 'microphone' });
+          if (p.state === 'granted') {
+            const s = await navigator.mediaDevices.getUserMedia({ audio:true });
+            permStreamRef.current = s;
+            setMicReady(true);
+            return;
+          }
+        } catch(_){}
+      }
+      const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
+      permStreamRef.current = stream;
+      setMicReady(true);
+    } catch(_){
+      alert('마이크 권한이 없어요. 브라우저 설정에서 허용해 주세요.');
     }
   };
-}
 
-function openRecordOverlay(word,cb){
-  finishRecordCallback=cb;
-  currentRecordWord=word;
-  currentRedoCount=0;
-  audioBase64='';audioChunks=[];audioBlob=null;
-  finalTranscript='';recordState=0;
-  document.getElementById('record-word-card').textContent=word;
-  document.getElementById('record-status').textContent='아래 마이크 버튼을 누르면 녹음이 시작됩니다.';
-  document.getElementById('record-tutorial').classList.remove('show');
-  const btn=document.getElementById('record-btn');
-  btn.textContent='🎤';btn.classList.remove('recording-anim');btn.disabled=false;
-  document.getElementById('kb-input-area').classList.remove('show');
-  document.getElementById('kb-text').value='';
-  document.getElementById('record-overlay').classList.add('show');
-  if(!micInitialized){
-    document.getElementById('record-status').innerHTML='⌨️ 마이크가 없어요. <strong>키보드로 입력</strong>해 주세요.';
-    btn.disabled=true;
-    document.getElementById('kb-input-area').classList.add('show');
-  }
-  playTTS(`${word}를 큰 소리로 읽어보세요.`);
-}
+  /* ── 녹음 빈도: 5문제마다 1회 ─────────── */
+  const recordPositions = useMemo(() => {
+    const total = qs.length;
+    const positions = [];
+    // 5문제마다, 마지막 문제 직후
+    for (let i = 5; i <= total; i += 5) positions.push(i);
+    // 5미만이면 마지막에 1회
+    if (total > 0 && total < 5) positions.push(total);
+    return positions;
+  }, [qs.length]);
 
-function toggleKeyboardInput(){
-  const a=document.getElementById('kb-input-area');
-  a.classList.toggle('show');
-}
+  const recordCount = recordPositions.length;
+  const isRecordTime = recordPositions.includes(qIdx + 1) && !reviewMode;
 
-function submitKeyboard(){
-  const txt=document.getElementById('kb-text').value.trim();
-  if(!txt){
-    alert('단어를 입력해주세요!');
-    return;
-  }
-  finalTranscript=txt;
-  // 키보드 입력은 녹음없이 통과 → 자기평가 단계로
-  audioBlob=null;audioBase64='';
-  goSelfEval();
-}
+  /* ── TTS 안내 (스피커 켜진 경우만) ─────── */
+  useEffect(() => {
+    if (!soundOn) return;
+    if (phase === 'intro') speak('오늘은 꾸며주는 말로 문장을 더 생생하게 만들어볼 거예요!', true);
+    else if (phase === 'concept' && conceptStep === 'explain') {
+      const w = conceptList[conceptIdx];
+      if (w) speak(`${w.ex} 이럴 때 쓰는 꾸며주는 말은 ${w.id}. ${w.desc}`, true);
+    }
+    else if (phase === 'concept' && conceptStep === 'practice') {
+      speak('이제 단어들을 모양과 소리로 분류해볼까요? 아래로 끌어다 놓아요.', true);
+    }
+    else if (phase === 'activity') {
+      const list = reviewMode ? wrong : qs;
+      const q = list[qIdx];
+      if (q) speak(`${q.before}, 빈칸, ${q.after}. 알맞은 꾸며주는 말을 골라보세요.`, true);
+    }
+    else if (phase === 'recording') speak('꾸며주는 말을 두 개 이상 넣어 문장을 만들어볼까요?', true);
+    else if (phase === 'reflection') speak('오늘 배운 것을 정리해볼까요?', true);
+    else if (phase === 'self_rating') speak('나의 다짐을 별표로 평가해봐요!', true);
+    else if (phase === 'report') speak('수료증이 나왔어요! 정말 잘했어요!', true);
+  }, [phase, conceptIdx, qIdx, conceptStep, soundOn]);
 
-window.handleRecordClick=async function(){
-  if(!micInitialized || !mediaRecorder){
-    alert('마이크가 준비되지 않았어요. 키보드로 입력해 주세요.');
-    return;
-  }
-  const btn=document.getElementById('record-btn');
-  const status=document.getElementById('record-status');
-  if(recordState===0){
-    // 녹음 시작
-    try{
-      audioChunks=[];finalTranscript='';
-      if(recognition){try{recognition.abort();}catch(e){} recognition.start();}
-      if(mediaRecorder.state!=='recording') mediaRecorder.start();
-      recordState=1;
-      btn.textContent='⏹️';btn.classList.add('recording-anim');
-      document.getElementById('record-tutorial').classList.add('show');
-      status.innerHTML=`<span style="color:#555;">여기에 여러분의 목소리가 글자로 나타나요!</span>`;
-    }catch(e){console.error(e);}
-  }else if(recordState===1){
-    // 녹음 종료
-    recordState=2;
-    btn.textContent='⏳';btn.disabled=true;
-    btn.classList.remove('recording-anim');
-    document.getElementById('record-tutorial').classList.remove('show');
-    status.textContent='저장 중입니다...';
-    setTimeout(()=>{if(recognition){try{recognition.stop();}catch(e){}}},400);
-    mediaRecorder.onstop=()=>{
-      setTimeout(()=>{
-        audioBlob=new Blob(audioChunks,{type:'audio/webm'});
-        const reader=new FileReader();
-        reader.readAsDataURL(audioBlob);
-        reader.onloadend=()=>{
-          audioBase64=(reader.result||'').split(',')[1]||'';
-          goSelfEval();
+  /* ── 시작 / 레벨 선택 ─────────────────── */
+  const handleLevel = useCallback((count) => {
+    const shuffled = [...QUIZ_Q].sort(() => Math.random() - .5)
+      .slice(0, Math.min(count, QUIZ_Q.length))
+      .map(q => ({ ...q, opts:[...q.opts].sort(() => Math.random() - .5) }));
+    setQs(shuffled);
+    const picked = [...WORD_DB].sort(() => Math.random() - .5).slice(0, 4);
+    setConceptList(picked);
+    setQIdx(0); setFb(null); setWrong([]); setHistory([]);
+    setReviewMode(false); setFinalStars(0);
+    setRecSessions([]); setCurrentRecIdx(0);
+    setHelpUsedThisQ(false); setTotalHelp(0);
+    setStickers([]);
+    setReflection({ best:'', hard:'', next:'' });
+    setPhase('concept'); setConceptIdx(0); setConceptStep('explain');
+    sfx.click(soundOn);
+  }, [soundOn]);
+
+  /* ── 개념 연습 (드래그) 시작 ────────────── */
+  const startConceptPractice = useCallback(() => {
+    // 모양 2개 + 소리 2개로 균형 있게 (4개)
+    const shapes = WORD_DB.filter(w => w.cat === '모양').sort(() => Math.random() - .5).slice(0, 2);
+    const sounds = WORD_DB.filter(w => w.cat === '소리').sort(() => Math.random() - .5).slice(0, 2);
+    const mixed = [...shapes, ...sounds]
+      .sort(() => Math.random() - .5)
+      .map(w => ({ word: w.id, emoji: w.emoji, correctCat: w.cat, placed: null }));
+    setPracticeItems(mixed);
+    setPracticeFb(null);
+    setConceptStep('practice');
+  }, []);
+
+  // 드래그 상태
+  const [dragging, setDragging] = useState(null);
+  const dropZoneRef = useRef({});
+
+  const handleDragStart = (idx) => {
+    setDragging(idx);
+    sfx.click(soundOn);
+  };
+  const handleDrop = (cat) => {
+    if (dragging === null) return;
+    const item = practiceItems[dragging];
+    const correct = item.correctCat === cat;
+    setPracticeItems(prev => prev.map((it, i) =>
+      i === dragging ? { ...it, placed: cat, correct } : it
+    ));
+    if (correct) {
+      sfx.correct(soundOn);
+      // ✅ 정답 피드백 (큰 글씨로)
+      setPracticeFb({
+        ok: true,
+        word: item.word,
+        emoji: item.emoji,
+        cat: cat,
+        msg: `${item.word}는 ${cat}을 꾸며주는 말이 맞아요!`
+      });
+      if (soundOn) speak(`정답이에요! ${item.word}는 ${cat}을 꾸며주는 말이에요.`, true);
+      setTimeout(() => setPracticeFb(null), 1800);
+    } else {
+      sfx.wrong(soundOn);
+      setPracticeShake(dragging);
+      // ❌ 오답 피드백 (큰 글씨로 명확하게)
+      setPracticeFb({
+        ok: false,
+        word: item.word,
+        emoji: item.emoji,
+        wrongCat: cat,
+        correctCat: item.correctCat,
+        msg: `${item.word}는 ${cat}이 아니에요. ${item.correctCat}을 꾸며주는 말이에요!`
+      });
+      if (soundOn) speak(`아쉬워요! ${item.word}는 ${item.correctCat}을 꾸며주는 말이에요. 다시 해볼까요?`, true);
+      setTimeout(() => setPracticeShake(null), 500);
+      // 잠시 후 리셋 (틀린 것)
+      setTimeout(() => {
+        setPracticeItems(prev => prev.map((it,i) =>
+          i === dragging ? { ...it, placed: null, correct: undefined } : it
+        ));
+        setPracticeFb(null);
+      }, 2200);
+    }
+    setDragging(null);
+  };
+
+  // 모바일 터치 드래그
+  const touchPosRef = useRef({ x:0, y:0 });
+  const handleTouchStart = (idx, e) => {
+    setDragging(idx);
+    const t = e.touches[0];
+    touchPosRef.current = { x:t.clientX, y:t.clientY };
+  };
+  const handleTouchEnd = (e) => {
+    if (dragging === null) return;
+    const t = e.changedTouches[0];
+    const el = document.elementFromPoint(t.clientX, t.clientY);
+    if (el) {
+      const zone = el.closest('[data-dropzone]');
+      if (zone) {
+        handleDrop(zone.dataset.dropzone);
+        return;
+      }
+    }
+    setDragging(null);
+  };
+
+  const allPracticePlaced = practiceItems.length > 0 && practiceItems.every(p => p.placed);
+
+  /* ── 퀴즈 답 체크 ─────────────────────── */
+  const checkAns = useCallback((ua) => {
+    const list = reviewMode ? wrong : qs;
+    const q = list[qIdx];
+    const ok = ua === q.a;
+    if (!reviewMode) {
+      setHistory(h => [...h, {
+        id:q.id, ok, word:q.a, concept:q.concept,
+        userAns:ua, helpUsed:helpUsedThisQ
+      }]);
+    }
+    if (ok) {
+      setFb({ ok:true, msg:q.fb, concept:q.concept });
+      if (reviewMode) setWrong(w => w.filter(x => x.id !== q.id));
+      sfx.correct(soundOn);
+      confetti({ particleCount:90, spread:60, origin:{ y:.65 } });
+      if (soundOn) speak(q.fb, true);
+    } else {
+      setFb({ ok:false, hint:`힌트: ${q.a}는 ${q.concept}이에요.` });
+      if (!wrong.find(x => x.id === q.id)) setWrong(w => [...w, q]);
+      sfx.wrong(soundOn);
+      if (soundOn) speak('아쉬워요, 다시 생각해볼까요?', true);
+    }
+  }, [reviewMode, wrong, qs, qIdx, soundOn, helpUsedThisQ]);
+
+  /* ── 도움받기: 문장 읽어주기 + 예시 추가 ── */
+  const useHelp = useCallback(() => {
+    const list = reviewMode ? wrong : qs;
+    const q = list[qIdx];
+    if (!q) return;
+    setHelpUsedThisQ(true);
+    setTotalHelp(t => t + 1);
+    sfx.click(soundOn);
+    // 강제로 읽어줌 (스피커 OFF여도 도움받기는 동작)
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(`${q.before} ____ ${q.after}`);
+      u.lang = 'ko-KR'; u.rate = 0.9; u.pitch = 1.0;
+      const v = pickKoVoice(); if (v) u.voice = v;
+      window.speechSynthesis.speak(u);
+      // 정답 단어의 예시문도 읽어주기
+      const wordData = WORD_DB.find(w => w.id === q.a);
+      if (wordData && wordData.ex) {
+        u.onend = () => {
+          const u2 = new SpeechSynthesisUtterance(`예를 들면, ${wordData.ex}`);
+          u2.lang = 'ko-KR'; u2.rate = 0.9; u2.pitch = 1.0;
+          if (v) u2.voice = v;
+          window.speechSynthesis.speak(u2);
         };
-      },700);
+      }
+    }
+  }, [reviewMode, wrong, qs, qIdx, soundOn]);
+
+  /* ── 다음 문제 ─────────────────────── */
+  const nextQ = useCallback(() => {
+    setFb(null);
+    setHelpUsedThisQ(false);
+    const list = reviewMode ? wrong : qs;
+
+    // 이번 문제 풀고 나서 녹음 타이밍이면 녹음 화면으로
+    if (!reviewMode && recordPositions.includes(qIdx + 1) && qIdx < qs.length - 1) {
+      // 녹음 후 다음 문제로 가도록 인덱스 증가
+      setQIdx(q => q + 1);
+      setCurrentRecIdx(recordPositions.indexOf(qIdx + 1));
+      goToRecording();
+      return;
+    }
+
+    if (qIdx < list.length - 1) {
+      setQIdx(q => q + 1);
+    } else {
+      // 마지막 문제
+      if (reviewMode || wrong.length === 0) {
+        // 마지막 녹음 타이밍 (5문제만 있는 경우)
+        if (!reviewMode && recordPositions.includes(qs.length) && currentRecIdx < recordCount) {
+          setCurrentRecIdx(recordPositions.indexOf(qs.length));
+          goToRecording();
+        } else {
+          setPhase('reflection');
+        }
+      } else {
+        setPhase('재도전안내');
+      }
+    }
+  }, [reviewMode, wrong, qs, qIdx, recordPositions, recordCount, currentRecIdx]);
+
+  /* ── 녹음 화면으로 ──────────────── */
+  const goToRecording = () => {
+    // 그동안 맞춘 단어 중에서 선택
+    const learned = [...new Set(history.filter(h => h.ok).map(h => h.word))];
+    const choices = learned.length >= 3 ? learned : [...learned, ...WORD_DB.slice(0,4).map(w=>w.id)];
+    setRecWord(choices[0] || WORD_DB[0].id);
+    setRecStep('idle');
+    setAudioUrl(null); setAudioB64(null);
+    setSttText(''); setInterimText(''); setTypedText('');
+    setInputMode('voice');
+    setRecSelfStars(0);
+    setPhase('recording');
+  };
+
+  /* ── 녹음 시작 (Web Speech API + MediaRecorder) ── */
+  const startRec = async () => {
+    sfx.record(soundOn);
+    setSttText(''); setInterimText('');
+    try {
+      let stream = permStreamRef.current;
+      if (!stream || stream.getAudioTracks().every(t => t.readyState === 'ended')) {
+        stream = await navigator.mediaDevices.getUserMedia({ audio:true });
+        permStreamRef.current = stream;
+      }
+      const mr = new MediaRecorder(stream);
+      mrRef.current = mr; chunksRef.current = [];
+      mr.ondataavailable = e => { if (e.data.size > 0) chunksRef.current.push(e.data); };
+      mr.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type:'audio/webm' });
+        setAudioUrl(URL.createObjectURL(blob));
+        const fr = new FileReader();
+        fr.readAsDataURL(blob);
+        fr.onloadend = () => { setAudioB64(fr.result.split(',')[1]); setRecStep('done'); };
+      };
+      mr.start();
+      setRecStep('rec');
+
+      // STT (실시간) - Chrome/Edge에서만 동작
+      const SpeechRecog = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SpeechRecog) {
+        const rec = new SpeechRecog();
+        rec.lang = 'ko-KR';
+        rec.continuous = true;
+        rec.interimResults = true;
+        rec.onresult = (ev) => {
+          let final = '', interim = '';
+          for (let i = ev.resultIndex; i < ev.results.length; i++) {
+            const t = ev.results[i][0].transcript;
+            if (ev.results[i].isFinal) final += t;
+            else interim += t;
+          }
+          if (final) setSttText(prev => (prev + ' ' + final).trim());
+          setInterimText(interim);
+        };
+        rec.onerror = (e) => { console.log('STT 오류:', e.error); };
+        recogRef.current = rec;
+        try { rec.start(); } catch(_){}
+      } else {
+        // STT 미지원
+        setSttText('(받아쓰기 미지원: 녹음만 됩니다)');
+      }
+    } catch(_){
+      alert('마이크를 사용할 수 없어요!');
+    }
+  };
+
+  const stopRec = () => {
+    if (mrRef.current && mrRef.current.state !== 'inactive') mrRef.current.stop();
+    if (recogRef.current) {
+      try { recogRef.current.stop(); } catch(_){}
+      recogRef.current = null;
+    }
+    setInterimText('');
+  };
+
+  /* ── 완성 문장 듣기 (TTS + 글자 하이라이트) ── */
+  const playFinalSentence = () => {
+    const text = inputMode === 'voice' ? sttText : typedText;
+    if (!text.trim()) return;
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+
+    setRecReadingIdx(0);
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'ko-KR'; u.rate = 0.95; u.pitch = 1.0;
+    const v = pickKoVoice(); if (v) u.voice = v;
+
+    // 글자별 진행 추정 (한국어는 boundary가 잘 안 옴 → 시간 기반)
+    const totalMs = text.length * 150; // 한 글자 ~150ms
+    let startTime = Date.now();
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const idx = Math.min(text.length - 1, Math.floor((elapsed / totalMs) * text.length));
+      setRecReadingIdx(idx);
+      if (elapsed > totalMs) {
+        clearInterval(interval);
+        setRecReadingIdx(-1);
+      }
+    }, 100);
+    u.onend = () => { setTimeout(() => setRecReadingIdx(-1), 300); clearInterval(interval); };
+    window.speechSynthesis.speak(u);
+  };
+
+  /* ── 녹음 자기평가 후 처리 ────────────── */
+  const submitRecSelfEval = () => {
+    const text = inputMode === 'voice' ? sttText : typedText;
+    const session = {
+      idx: currentRecIdx,
+      word: recWord,
+      sttText: text,
+      audioB64: audioB64,
+      stars: recSelfStars,
+      mode: inputMode,
+      retried: false
     };
-    if(mediaRecorder.state!=='inactive') mediaRecorder.stop();
+    setRecSessions(prev => [...prev, session]);
+
+    // 다음 단계 결정
+    const isLastRec = currentRecIdx >= recordCount - 1;
+    const isLastQuiz = qIdx >= qs.length - 1;
+
+    if (isLastRec || isLastQuiz) {
+      setPhase('reflection');
+    } else {
+      // 다음 문제로
+      setPhase('activity');
+    }
+  };
+
+  /* ── 다시 녹음 (자기평가 결과로) ────── */
+  const retryRec = () => {
+    setRecStep('idle');
+    setAudioUrl(null); setAudioB64(null);
+    setSttText(''); setInterimText(''); setTypedText('');
+    setRecSelfStars(0);
+  };
+
+  /* ── 성찰 음성 입력 ──────────────── */
+  const startReflectionRec = (key) => {
+    const SpeechRecog = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecog) {
+      alert('이 브라우저는 음성 입력을 지원하지 않아요. 키보드로 입력해주세요!');
+      return;
+    }
+    // 다른 키 녹음 중이면 중지
+    Object.keys(reflRecogRef.current).forEach(k => {
+      if (k !== key && reflRecogRef.current[k]) {
+        try { reflRecogRef.current[k].stop(); } catch(_){}
+        reflRecogRef.current[k] = null;
+      }
+    });
+    setReflectionRecState(prev => Object.keys(prev).reduce((acc, k) => {
+      acc[k] = k === key ? 'rec' : 'idle';
+      return acc;
+    }, {}));
+
+    const rec = new SpeechRecog();
+    rec.lang = 'ko-KR';
+    rec.continuous = true;
+    rec.interimResults = true;
+    rec.onresult = (ev) => {
+      let final = '', interim = '';
+      for (let i = ev.resultIndex; i < ev.results.length; i++) {
+        const t = ev.results[i][0].transcript;
+        if (ev.results[i].isFinal) final += t;
+        else interim += t;
+      }
+      if (final) setReflection(r => ({ ...r, [key]: ((r[key] || '') + ' ' + final).trim() }));
+      setReflectionInterim(prev => ({ ...prev, [key]: interim }));
+    };
+    rec.onerror = () => {};
+    rec.onend = () => {
+      setReflectionRecState(prev => ({ ...prev, [key]: 'idle' }));
+      setReflectionInterim(prev => ({ ...prev, [key]: '' }));
+    };
+    reflRecogRef.current[key] = rec;
+    try { rec.start(); sfx.record(soundOn); } catch(_){}
+  };
+
+  const stopReflectionRec = (key) => {
+    if (reflRecogRef.current[key]) {
+      try { reflRecogRef.current[key].stop(); } catch(_){}
+      reflRecogRef.current[key] = null;
+    }
+    setReflectionRecState(prev => ({ ...prev, [key]: 'idle' }));
+    setReflectionInterim(prev => ({ ...prev, [key]: '' }));
+  };
+
+  /* ── 스티커 부여 ─────────────────── */
+  const awardSticker = (type = 'star') => {
+    setStickers(prev => [...prev, type]);
+    setRewardType(type);
+    setShowReward(true);
+    sfx.reward(soundOn);
+    confetti({ particleCount:60, spread:50, origin:{ y:.6 } });
+  };
+
+  /* ── 결과 저장 ─────────────────── */
+  const saveResult = async () => {
+    if (saved) { setPhase('report'); return; }
+    setSaving(true); setSaved(true);
+    const learned = [...new Set(history.filter(h => h.ok).map(h => h.word))];
+    const correctCount = history.filter(h => h.ok).length;
+
+    // 녹음들을 묶어서 보냄
+    const payload = {
+      name: student,
+      total: qs.length,
+      correct: correctCount,
+      words: learned,
+      rating: finalStars,
+      helpCount: totalHelp,
+      stickers: stickers.length,
+      reflection: reflection,
+      recordings: recSessions.map(r => ({
+        word: r.word,
+        text: r.sttText,
+        stars: r.stars,
+        mode: r.mode,
+        audioBase64: r.audioB64
+      })),
+      // 호환용: 첫 녹음을 메인으로
+      audioBase64: recSessions[0]?.audioB64 || null
+    };
+
+    if (GAS_URL) await gasPost(payload);
+    setSaving(false);
+    setPhase('report');
+  };
+
+  const toggleSound = () => {
+    setSoundOn(s => {
+      const newVal = !s;
+      // 켤 때 효과음 재생
+      if (newVal) {
+        const ctx = getAudioCtx();
+        if (ctx && ctx.state === 'suspended') ctx.resume();
+        setTimeout(() => sfx.click(true), 50);
+      } else {
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+      }
+      return newVal;
+    });
+  };
+
+  const goHome = () => {
+    if (confirm('정말 처음으로 돌아갈까요? 지금까지 한 것이 사라져요.')) {
+      window.location.reload();
+    }
+  };
+
+  /* ════════════ 화면 렌더링 ════════════ */
+
+  /* 로딩 */
+  if (phase === 'loading') return (
+    <div className="w-full h-full flex flex-col items-center justify-center gap-4 p-4">
+      <div className="w-20 h-20 border-4 border-green-100 border-t-green-500 rounded-full animate-spin" />
+      <p className="txt-xl font-bold text-slate-400">잠깐만요, 준비 중이에요~</p>
+    </div>
+  );
+
+  /* 시작 */
+  if (phase === 'start') return (
+    <div className="w-full h-full flex flex-col items-center justify-center p-4 sm:p-6 relative overflow-hidden"
+      style={{ background:'linear-gradient(145deg,#f0fdf4 0%,#ecfeff 100%)' }}>
+      <div className="absolute top-6 left-6 opacity-10 float emoji-xl">🖊️</div>
+      <div className="absolute bottom-12 right-6 opacity-10 float emoji-xl" style={{ animationDelay:'.8s' }}>🌿</div>
+
+      <div className="float mb-3 shrink-0"><Mascot size={110}/></div>
+      <h1 className="txt-hero font-bold text-slate-900 mb-1 tracking-tight text-center shrink-0 word-keep">
+        꾸며주는 말 <span className="text-green-500">탐험대</span> ✨
+      </h1>
+      <p className="txt-md font-bold text-slate-400 mb-4 sm:mb-6 shrink-0">문장을 더 생생하게 만들어봐요!</p>
+
+      <div className="card card-green w-full max-w-sm p-5 sm:p-7 shadow-xl">
+        <p className="text-center font-bold text-green-500 tracking-wide mb-3 txt-md">📝 내 이름을 골라요</p>
+        <select value={student} onChange={e => setStudent(e.target.value)}
+          className="w-full p-3 sm:p-4 mb-4 bg-slate-50 border-2 border-slate-100 rounded-2xl txt-2xl font-bold text-slate-800 text-center focus:outline-none focus:border-green-400">
+          {students.map(s => <option key={s} value={s}>{s}</option>)}
+        </select>
+
+        {!micReady ? (
+          <button onClick={requestMic}
+            className="btn w-full py-3 sm:py-4 mb-3 bg-green-50 text-green-700 border-2 border-green-200 rounded-2xl font-bold txt-md">
+            🎙️ 마이크 준비하기
+          </button>
+        ) : (
+          <p className="text-center text-emerald-600 font-bold txt-md mb-3">✅ 마이크 준비 완료!</p>
+        )}
+
+        <button onClick={() => { sfx.click(soundOn); setPhase('intro'); }}
+          className="btn w-full py-4 sm:py-5 bg-green-500 text-white rounded-2xl font-bold txt-3xl shadow-lg hover:bg-green-600">
+          시작하기 ▶
+        </button>
+      </div>
+
+      <button onClick={toggleSound}
+        className={`btn mt-4 w-14 h-14 sm:w-16 sm:h-16 rounded-2xl border-2 shadow-sm txt-3xl ${soundOn ? 'bg-green-100 text-green-600 border-green-200':'bg-white text-slate-300 border-slate-100'}`}>
+        {soundOn ? '🔊' : '🔇'}
+      </button>
+      <p className="text-slate-500 mt-2 txt-md font-bold">스피커: {soundOn ? '켜짐 (읽어줘요)' : '꺼짐'}</p>
+    </div>
+  );
+
+  /* 인트로 */
+  if (phase === 'intro') return (
+    <div className="w-full h-full flex flex-col" style={{ background:'#f0fdf4' }}>
+      <Header label="🌿 공부 약속" soundOn={soundOn} toggleSound={toggleSound} onHome={goHome}/>
+      <div className="flex-1 flex flex-col items-center justify-center text-center px-4 py-3 min-h-0 overflow-hidden">
+        <div className="inline-block bg-green-100 text-green-700 font-bold px-4 py-2 rounded-full mb-3 txt-md shrink-0">
+          📝 오늘의 공부 약속
+        </div>
+        <h2 className="txt-3xl font-bold text-slate-800 mb-3 sm:mb-5 leading-tight word-keep shrink-0">
+          꾸며주는 말을 넣어<br/>
+          <span className="text-green-500">문장을 더 생생하게</span> 만들어봐요!
+        </h2>
+        <div className="card card-green p-4 sm:p-5 max-w-xl mx-auto mb-4 sm:mb-6 txt-md font-bold text-slate-500 leading-relaxed word-keep shrink-0">
+          모양이나 소리를 나타내는 말을 넣으면<br/>
+          문장이 훨씬 재미있어져요!<br/>
+          함께 탐험해볼까요? 🎒
+        </div>
+        <button onClick={() => { sfx.click(soundOn); setPhase('level_select'); }}
+          className="btn w-full max-w-sm py-3 sm:py-4 bg-green-500 text-white rounded-2xl font-bold txt-2xl shadow-lg hover:bg-green-600 shrink-0">
+          탐험 시작! ➡️
+        </button>
+      </div>
+    </div>
+  );
+
+  /* 레벨 선택 */
+  if (phase === 'level_select') return (
+    <div className="w-full h-full flex flex-col bg-white">
+      <Header label="📚 탐험 수 선택" soundOn={soundOn} toggleSound={toggleSound} onHome={goHome}/>
+      <div className="flex-1 flex flex-col items-center justify-center px-4 py-3 text-center min-h-0 overflow-hidden">
+        <h2 className="txt-2xl font-bold text-slate-800 mb-2 word-keep shrink-0">몇 개를 탐험할까요?</h2>
+        <p className="txt-md font-bold text-slate-400 mb-4 sm:mb-6 shrink-0">난이도를 골라요!</p>
+        <div className="flex flex-col gap-3 w-full max-w-md shrink-0">
+          {[[3,'🌱','짧게','5문제 미만일 땐 끝에 1번 녹음'],
+            [5,'🌿','보통','5문제 + 1번 녹음'],
+            [10,'🌳','도전','10문제 + 2번 녹음']].map(([n,icon,title,sub]) => (
+            <button key={n} onClick={() => handleLevel(n)}
+              className="btn py-3 sm:py-4 bg-white border-4 border-green-100 hover:border-green-400 hover:bg-green-50 rounded-3xl font-bold text-green-600 shadow-md flex items-center justify-between px-4 sm:px-6 gap-2 sm:gap-3">
+              <span className="emoji-md">{icon}</span>
+              <div className="flex-1 text-left">
+                <div className="txt-2xl font-bold">{n}개 탐험</div>
+                <div className="txt-md text-slate-500 font-bold">{sub}</div>
+              </div>
+              <span className="txt-md text-slate-500 font-bold">{title}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  /* 개념 학습 - 설명 */
+  if (phase === 'concept' && conceptStep === 'explain') {
+    const w = conceptList[conceptIdx] || WORD_DB[0];
+    const totalConcept = conceptList.length;
+    return (
+      <div className="w-full h-full flex flex-col" style={{ background:'#f8fffb' }}>
+        <Header label="💡 꾸며주는 말 배우기" soundOn={soundOn} toggleSound={toggleSound} onHome={goHome}
+          progress={{ current: conceptIdx+1, total: totalConcept }}/>
+        <div className="flex-1 flex flex-col px-3 sm:px-4 py-2 min-h-0 overflow-hidden">
+          <div className="card card-green w-full max-w-2xl mx-auto p-3 sm:p-5 flex flex-col items-center text-center flex-1 min-h-0 justify-center">
+            <span className={`txt-md font-bold px-3 py-1.5 rounded-2xl mb-2 shrink-0 ${w.cat === '모양' ? 'bg-green-100 text-green-700':'bg-teal-100 text-teal-700'}`}>
+              {w.cat === '모양' ? '👀 모양을 꾸며주는 말' : '👂 소리를 꾸며주는 말'}
+            </span>
+            <div className="bg-green-50 border-2 border-green-100 rounded-2xl p-2 sm:p-3 mb-2 w-full shrink-0">
+              <p className="txt-xl font-bold text-slate-700 italic word-keep text-center">"{w.ex}"</p>
+            </div>
+            <div className="emoji-xl shrink-0 float">{w.emoji}</div>
+            <h3 className="txt-hero font-bold text-green-600 my-1 shrink-0">"{w.id}"</h3>
+            <p className="txt-md font-bold text-slate-500 word-keep shrink-0">{w.desc}</p>
+          </div>
+          <button onClick={() => {
+            sfx.click(soundOn);
+            if (conceptIdx < totalConcept - 1) setConceptIdx(c => c + 1);
+            else startConceptPractice();
+          }}
+            className="btn mt-2 shrink-0 w-full max-w-2xl mx-auto py-3 rounded-2xl font-bold txt-2xl shadow-lg text-white bg-green-600 hover:bg-green-700">
+            {conceptIdx < totalConcept - 1 ? '다음 설명 보기 ➡️' : '연습해보기! 🎯'}
+          </button>
+        </div>
+      </div>
+    );
   }
+
+  /* 개념 연습 - 드래그 분류 */
+  if (phase === 'concept' && conceptStep === 'practice') {
+    return (
+      <div className="w-full h-full flex flex-col" style={{ background:'#f8fffb' }}>
+        <Header label="🎯 분류 연습" soundOn={soundOn} toggleSound={toggleSound} onHome={goHome}/>
+        <div className="flex-1 flex flex-col px-3 sm:px-4 py-2 min-h-0 overflow-hidden relative">
+
+          {/* 큰 피드백 오버레이 (스피커 OFF여도 명확하게) */}
+          {practiceFb && (
+            <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none px-4">
+              <div className={`pop-in card border-4 p-4 sm:p-6 max-w-md w-full text-center ${
+                practiceFb.ok
+                  ? 'bg-emerald-50 border-emerald-400'
+                  : 'bg-rose-50 border-rose-400'
+              }`} style={{ boxShadow: '0 20px 50px rgba(0,0,0,0.2)' }}>
+                <div className="emoji-lg mb-2">{practiceFb.ok ? '🎉' : '🤔'}</div>
+                <p className={`txt-3xl font-bold mb-2 ${practiceFb.ok ? 'text-emerald-600':'text-rose-600'}`}>
+                  {practiceFb.ok ? '정답이에요!' : '아쉬워요!'}
+                </p>
+                <p className="txt-xl font-bold text-slate-700 word-keep">{practiceFb.msg}</p>
+                {!practiceFb.ok && (
+                  <p className="txt-md font-bold text-amber-600 mt-2">💡 다시 해볼까요?</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          <p className="text-center txt-xl font-bold text-slate-700 mb-1 shrink-0 word-keep">
+            👇 단어를 알맞은 곳으로 끌어다 놓아요!
+          </p>
+          <p className="text-center txt-md font-bold text-amber-600 mb-2 shrink-0">
+            💡 틀려도 괜찮아요. 다시 시도할 수 있어요!
+          </p>
+
+          {/* 단어 카드들 */}
+          <div className="flex flex-wrap gap-2 justify-center mb-2 shrink-0 px-1">
+            {practiceItems.map((it, i) => !it.placed && (
+              <div key={i}
+                draggable
+                onDragStart={() => handleDragStart(i)}
+                onTouchStart={(e) => handleTouchStart(i, e)}
+                onTouchEnd={handleTouchEnd}
+                className={`drag-item card card-amber px-3 py-2 ${practiceShake === i ? 'shake':''}`}
+                style={{ background:'#fffbeb' }}>
+                <div className="emoji-md text-center">{it.emoji}</div>
+                <div className="txt-xl font-bold text-amber-700 text-center">{it.word}</div>
+              </div>
+            ))}
+            {practiceItems.length > 0 && practiceItems.every(p => p.placed) && (
+              <div className="txt-2xl font-bold text-emerald-600 py-3">✨ 모두 분류 완료!</div>
+            )}
+          </div>
+
+          {/* 드롭 영역 */}
+          <div className="grid grid-cols-2 gap-2 sm:gap-3 flex-1 min-h-0">
+            {[
+              { key:'모양', label:'👀 모양', desc:'눈으로 보는 모습', color:'green', bg:'#dcfce7' },
+              { key:'소리', label:'👂 소리', desc:'귀로 듣는 소리', color:'teal', bg:'#ccfbf1' }
+            ].map(zone => {
+              const placed = practiceItems.filter(it => it.placed === zone.key && it.correct);
+              return (
+                <div key={zone.key}
+                  data-dropzone={zone.key}
+                  onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }}
+                  onDragLeave={(e) => e.currentTarget.classList.remove('drag-over')}
+                  onDrop={(e) => { e.preventDefault(); e.currentTarget.classList.remove('drag-over'); handleDrop(zone.key); }}
+                  className={`card card-${zone.color} flex flex-col items-center p-2 sm:p-3 overflow-hidden`}>
+                  <div className={`txt-2xl font-bold text-${zone.color}-700 shrink-0`}>{zone.label}</div>
+                  <div className={`txt-md font-bold text-${zone.color}-600 mb-1 shrink-0`}>{zone.desc}</div>
+                  <div className="flex flex-wrap gap-1 sm:gap-2 justify-center w-full content-start flex-1 overflow-hidden">
+                    {placed.map((it, i) => (
+                      <div key={i} className="bg-white px-2 py-1 rounded-xl border-2 border-emerald-200 pop-in">
+                        <span className="txt-md font-bold text-emerald-700">{it.emoji} {it.word}</span>
+                      </div>
+                    ))}
+                    {placed.length === 0 && (
+                      <p className="text-slate-300 txt-md font-bold self-center">여기로 끌어요</p>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <button onClick={() => { sfx.click(soundOn); setQIdx(0); setPhase('activity'); }}
+            disabled={!allPracticePlaced}
+            className="btn mt-2 shrink-0 w-full py-3 rounded-2xl font-bold txt-2xl shadow-lg text-white bg-green-600 hover:bg-green-700 disabled:bg-slate-300">
+            {allPracticePlaced ? '퀴즈 시작하기! 🎯' : `${practiceItems.filter(p => p.placed).length}/${practiceItems.length} 분류 완료`}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  /* 퀴즈 */
+  if (phase === 'activity') {
+    const list = reviewMode ? wrong : qs;
+    const q = list[qIdx];
+    if (!q) { setPhase('reflection'); return null; }
+
+    return (
+      <div className="w-full h-full flex flex-col bg-white">
+        <Header label={reviewMode ? '🔄 다시 풀기' : '🧩 꾸며주는 말 퀴즈'} soundOn={soundOn} toggleSound={toggleSound} onHome={goHome}
+          progress={{ current: qIdx+1, total: list.length }}/>
+        <div className="flex-1 flex flex-col px-2 sm:px-4 py-2 min-h-0 overflow-hidden">
+          <div className="card card-green w-full max-w-3xl mx-auto p-3 sm:p-5 text-center flex flex-col flex-1 min-h-0 justify-center">
+            {!fb ? (
+              <div className="flex flex-col h-full justify-center">
+                <div className="flex-1 flex flex-col justify-center min-h-0">
+                  <div className="emoji-xl mb-2 shrink-0">{q.img}</div>
+                  <div className="bg-green-50 border-2 border-green-100 rounded-2xl p-3 sm:p-4 mb-3 sm:mb-4 shrink-0">
+                    <p className="txt-2xl font-bold text-slate-800 word-keep leading-relaxed text-center">
+                      {q.before}&nbsp;
+                      <span className="inline-block bg-white border-b-4 border-green-400 px-3 sm:px-5 py-1 mx-1 rounded-xl text-green-500 font-bold">( ? )</span>
+                      &nbsp;{q.after}
+                    </p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2 sm:gap-4 shrink-0 mb-2">
+                  {q.opts.map((o,i) => (
+                    <button key={i} onClick={() => checkAns(o)}
+                      className="btn py-3 sm:py-5 bg-slate-50 hover:bg-green-50 rounded-3xl txt-2xl font-bold text-slate-700"
+                      style={{ border:'3px solid #f1f5f9' }}>
+                      {o}
+                    </button>
+                  ))}
+                </div>
+                {/* 도움받기 버튼 + 안내 (바로 위에) */}
+                <p className="text-amber-600 txt-md font-bold shrink-0 mb-1">💡 잘 모르겠으면 아래 버튼을 눌러요</p>
+                <button onClick={useHelp} disabled={helpUsedThisQ}
+                  className="btn shrink-0 py-2 px-4 bg-amber-100 text-amber-700 rounded-2xl font-bold txt-md border-2 border-amber-200 disabled:opacity-50">
+                  {helpUsedThisQ ? '✅ 도움받았어요' : '🆘 도움받기 (문장 읽어주기)'}
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col h-full justify-center w-full max-w-2xl mx-auto">
+                <div className="flex-1 flex flex-col justify-center min-h-0">
+                  <div className="emoji-xl mb-1 sm:mb-2">{fb.ok ? '🌟':'🤔'}</div>
+                  <h2 className={`txt-3xl font-bold mb-2 sm:mb-3 ${fb.ok ? 'text-emerald-500':'text-amber-500'}`}>
+                    {fb.ok ? '🎉 정답이에요!' : '다시 해볼까요?'}
+                  </h2>
+                  {fb.ok ? (
+                    <>
+                      <div className="bg-emerald-50 border-2 border-emerald-100 rounded-2xl p-2 sm:p-3 mb-2 txt-md font-bold text-slate-600 italic word-keep text-center">
+                        {fb.msg}
+                      </div>
+                      <div className="bg-green-100 rounded-2xl py-1.5 px-3 mb-2 mx-auto w-fit txt-md font-bold text-green-800">
+                        📝 {fb.concept}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-2 sm:p-3 mb-2 txt-md font-bold text-amber-700 word-keep text-center">
+                      {fb.hint}
+                    </div>
+                  )}
+                </div>
+                <button onClick={fb.ok ? nextQ : () => setFb(null)}
+                  className={`btn w-full py-3 shrink-0 rounded-2xl font-bold txt-2xl text-white shadow-lg ${fb.ok ? 'bg-emerald-500 hover:bg-emerald-600':'bg-amber-400 hover:bg-amber-500'}`}>
+                  {fb.ok ? (
+                    isRecordTime ? '🎙️ 녹음하러 가기 ▶' : '다음 문제로 ▶'
+                  ) : '다시 선택하기'}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* 재도전 안내 */
+  if (phase === '재도전안내') return (
+    <div className="w-full h-full flex flex-col">
+      <Header label="💡 한 번 더!" soundOn={soundOn} toggleSound={toggleSound} onHome={goHome}/>
+      <div className="flex-1 flex flex-col items-center justify-center text-center px-4 py-3 min-h-0 overflow-hidden">
+        <div className="emoji-xl mb-3 shrink-0">💡</div>
+        <h2 className="txt-3xl font-bold text-slate-800 mb-3 word-keep shrink-0">포기하지 않는 탐험가가<br/>제일 멋져요!</h2>
+        <div className="card card-amber p-4 max-w-md mx-auto mb-5 shrink-0">
+          <p className="txt-md font-bold text-slate-600 word-keep text-center">
+            아쉬운 문제를 한 번 더 풀어볼까요?
+          </p>
+        </div>
+        <button onClick={() => { sfx.click(soundOn); setReviewMode(true); setQIdx(0); setFb(null); setPhase('activity'); }}
+          className="btn py-3 sm:py-4 px-8 sm:px-10 shrink-0 bg-orange-500 text-white rounded-2xl font-bold txt-2xl shadow-lg hover:bg-orange-600">
+          🔄 다시 도전!
+        </button>
+      </div>
+    </div>
+  );
+
+  /* ── 녹음 화면 ── */
+  if (phase === 'recording') {
+    const learnedWords = [...new Set(history.filter(h => h.ok).map(h => h.word))];
+    const allWords = learnedWords.length >= 3 ? learnedWords : [...new Set([...learnedWords, ...WORD_DB.slice(0,5).map(w => w.id)])];
+    const displayWords = allWords.slice(0, 5);
+    const exWord = WORD_DB.find(w => w.id === recWord) || {};
+    const currentText = inputMode === 'voice' ? sttText : typedText;
+    const rubricCheck = currentText.includes(recWord);
+    const showSelfEval = (recStep === 'done') || (inputMode === 'keyboard' && typedText.trim());
+
+    return (
+      <div className="w-full h-full flex flex-col" style={{ background:'#f0fdf4' }}>
+        <Header label={`🎙️ 녹음 ${currentRecIdx+1}/${recordCount}`} soundOn={soundOn} toggleSound={toggleSound} onHome={goHome}/>
+        <div className="flex-1 flex flex-col px-2 sm:px-4 py-2 min-h-0 overflow-hidden">
+          <div className="card card-green flex-1 flex flex-col p-3 sm:p-4 min-h-0 max-w-3xl w-full mx-auto">
+
+            {/* 상단 안내 */}
+            <p className="txt-2xl font-bold text-green-600 text-center shrink-0">꾸며주는 말로 문장 만들기!</p>
+            <p className="txt-md font-bold text-amber-600 text-center mb-2 shrink-0 word-keep">
+              ✨ <strong>꾸며주는 말 2개 이상</strong> 넣어 말해볼까요?
+            </p>
+
+            {/* 단어 선택 */}
+            <div className="flex flex-wrap gap-1.5 sm:gap-2 justify-center mb-2 shrink-0">
+              {displayWords.map(w => (
+                <button key={w} onClick={() => { sfx.click(soundOn); setRecWord(w); }}
+                  className={`btn px-3 py-1.5 sm:py-2 rounded-2xl font-bold txt-md border-3 transition-all ${recWord === w ? 'bg-green-500 text-white border-green-500 scale-105':'bg-white text-green-700 border-green-200'}`}
+                  style={{ borderWidth: '3px' }}>
+                  {w}
+                </button>
+              ))}
+            </div>
+
+            {/* 예시 문장 */}
+            {recWord && (
+              <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-2 sm:p-3 mb-2 shrink-0">
+                <p className="txt-md font-bold text-amber-700 text-center word-keep">
+                  📝 예시: "{exWord.ex || `${recWord}을 넣어 문장을 만들어요`}"
+                </p>
+              </div>
+            )}
+
+            {/* 입력 모드 토글 */}
+            <div className="flex gap-2 mb-2 shrink-0">
+              <button onClick={() => setInputMode('voice')}
+                className={`btn flex-1 py-2 rounded-2xl font-bold txt-md ${inputMode === 'voice' ? 'bg-green-500 text-white':'bg-slate-100 text-slate-500'}`}>
+                🎙️ 녹음
+              </button>
+              <button onClick={() => setInputMode('keyboard')}
+                className={`btn flex-1 py-2 rounded-2xl font-bold txt-md ${inputMode === 'keyboard' ? 'bg-green-500 text-white':'bg-slate-100 text-slate-500'}`}>
+                ⌨️ 키보드
+              </button>
+            </div>
+
+            {/* 입력 영역 (flex-1로 가운데, 자기평가는 아래 고정) */}
+            <div className="flex-1 flex flex-col min-h-0 mb-2">
+              {/* 음성 모드 */}
+              {inputMode === 'voice' && (
+                <>
+                  {/* 실시간 받아쓰기 */}
+                  <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-2 sm:p-3 mb-2 shrink-0">
+                    <p className="txt-md font-bold text-slate-500 mb-1">📝 받아쓰기 (실시간)</p>
+                    <p className="txt-md font-bold text-blue-700 word-keep min-h-[1.5em]">
+                      {sttText}
+                      <span className="text-blue-400 italic">{interimText && ` ${interimText}`}</span>
+                      {!sttText && !interimText && <span className="text-slate-300">말한 내용이 여기에 보여요</span>}
+                    </p>
+                  </div>
+                  {/* 녹음 버튼 */}
+                  <div className="shrink-0">
+                    {recStep === 'idle' && (
+                      <button onClick={startRec}
+                        className="btn pulse-red w-full py-3 sm:py-4 bg-rose-500 text-white rounded-2xl font-bold txt-2xl shadow-lg">
+                        🔴 녹음 시작!
+                      </button>
+                    )}
+                    {recStep === 'rec' && (
+                      <div className="flex flex-col gap-2">
+                        <p className="txt-xl font-bold text-rose-500 animate-pulse text-center">🔴 녹음 중...</p>
+                        <button onClick={stopRec}
+                          className="btn w-full py-3 bg-slate-800 text-white rounded-2xl font-bold txt-xl shadow-lg">
+                          ⏹ 다 말했어요!
+                        </button>
+                      </div>
+                    )}
+                    {recStep === 'done' && (
+                      <div className="flex flex-col gap-2">
+                        <p className="txt-xl font-bold text-emerald-600 text-center">✅ 녹음 완료!</p>
+                        {audioUrl && <audio controls src={audioUrl} className="w-full rounded-xl h-10"/>}
+                        <button onClick={playFinalSentence}
+                          className="btn py-2 bg-blue-500 text-white rounded-xl font-bold txt-md">
+                          🔊 완성 문장 듣기
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {/* 키보드 모드 */}
+              {inputMode === 'keyboard' && (
+                <div className="shrink-0">
+                  <textarea value={typedText} onChange={(e) => setTypedText(e.target.value)}
+                    placeholder={`${recWord}을(를) 넣어 문장을 적어보세요...`}
+                    className="text-input w-full p-3 bg-blue-50 border-2 border-blue-200 rounded-2xl"
+                    rows={3}/>
+                  <button onClick={playFinalSentence} disabled={!typedText.trim()}
+                    className="btn w-full mt-2 py-2 bg-blue-500 text-white rounded-xl font-bold txt-md disabled:bg-slate-300">
+                    🔊 완성 문장 듣기
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* 자기평가 영역 (입력 후 표시, 항상 하단 고정) */}
+            {showSelfEval && (
+              <div className="bg-pink-50 border-2 border-pink-200 rounded-2xl p-2 sm:p-3 shrink-0">
+                <div className={`mb-1.5 p-1.5 rounded-xl txt-md font-bold text-center ${rubricCheck ? 'bg-emerald-100 text-emerald-700':'bg-amber-100 text-amber-700'}`}>
+                  {rubricCheck ? `✅ "${recWord}"이(가) 들어있어요!` : `💡 "${recWord}"을(를) 꼭 넣어주세요`}
+                </div>
+                <p className="text-center txt-md font-bold text-pink-700 mb-1.5">
+                  📢 들어보고 별점을 매겨요!
+                </p>
+                <StarRating value={recSelfStars} onChange={(s) => { setRecSelfStars(s); sfx.click(soundOn); }} size="normal"/>
+                {recSelfStars > 0 && recSelfStars <= 3 && (
+                  <p className="text-center txt-sm font-bold text-amber-600 mt-1">💡 다시 녹음을 추천해요!</p>
+                )}
+                <div className="flex gap-2 mt-2">
+                  <button onClick={retryRec}
+                    className="btn flex-1 py-2 bg-slate-100 text-slate-600 rounded-2xl font-bold txt-md">
+                    🔄 다시하기
+                  </button>
+                  <button onClick={() => { sfx.click(soundOn); awardSticker('star'); setTimeout(submitRecSelfEval, 1200); }}
+                    disabled={recSelfStars === 0 || (inputMode === 'voice' && !sttText.trim()) || (inputMode === 'keyboard' && !typedText.trim())}
+                    className="btn flex-[2] py-2 bg-green-600 text-white rounded-2xl font-bold txt-md shadow-lg hover:bg-green-700 disabled:bg-slate-300">
+                    {currentRecIdx < recordCount - 1 ? '제출하고 다음 ▶' : '제출하기 🏆'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+        <RewardSticker show={showReward} type={rewardType} onEnd={() => setShowReward(false)}/>
+      </div>
+    );
+  }
+
+  /* ── 배움 정리 / 성찰 ── */
+  if (phase === 'reflection') {
+    const learned = [...new Set(history.filter(h => h.ok).map(h => h.word))];
+    const correctCount = history.filter(h => h.ok).length;
+    const reflectionItems = [
+      { key:'best', label:'😊 오늘 가장 잘한 점은?', placeholder:'예) 살금살금을 잘 알게 됐어요', color:'green' },
+      { key:'hard', label:'🤔 어려웠던 점은?', placeholder:'예) 받침이 어려웠어요', color:'amber' },
+      { key:'next', label:'🎯 다음에 해보고 싶은 건?', placeholder:'예) 더 많은 문장을 만들고 싶어요', color:'blue' }
+    ];
+    return (
+      <div className="w-full h-full flex flex-col bg-white">
+        <Header label="🌱 배움 정리" soundOn={soundOn} toggleSound={toggleSound} onHome={goHome}/>
+        <div className="flex-1 flex flex-col px-2 sm:px-4 py-2 min-h-0 overflow-hidden">
+          <div className="w-full max-w-3xl mx-auto flex-1 flex flex-col min-h-0">
+            <h2 className="txt-2xl font-bold text-slate-800 mb-1 text-center word-keep shrink-0">🌱 오늘 배운 것을 정리해봐요</h2>
+
+            {/* 결과 요약 */}
+            <div className="card card-green p-2 sm:p-3 mb-2 shrink-0">
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div>
+                  <p className="txt-md font-bold text-slate-400">맞춘 문제</p>
+                  <p className="txt-2xl font-bold text-emerald-500">{correctCount}/{qs.length}</p>
+                </div>
+                <div>
+                  <p className="txt-md font-bold text-slate-400">배운 단어</p>
+                  <p className="txt-2xl font-bold text-green-500">{learned.length}개</p>
+                </div>
+                <div>
+                  <p className="txt-md font-bold text-slate-400">도움받기</p>
+                  <p className="txt-2xl font-bold text-amber-500">{totalHelp}번</p>
+                </div>
+              </div>
+            </div>
+
+            {/* 성찰 질문 (스크롤 가능, 안내 음성/키보드) */}
+            <div className="flex-1 flex flex-col gap-2 min-h-0 overflow-y-auto scroll-y pr-1">
+              {reflectionItems.map(item => {
+                const isRecording = reflectionRecState[item.key] === 'rec';
+                return (
+                  <div key={item.key} className={`card card-${item.color} p-2 sm:p-3 shrink-0`}>
+                    <label className={`block txt-md font-bold text-${item.color}-700 mb-1`}>{item.label}</label>
+                    <textarea value={reflection[item.key] + (reflectionInterim[item.key] ? ' ' + reflectionInterim[item.key] : '')}
+                      onChange={(e) => setReflection(r => ({ ...r, [item.key]: e.target.value }))}
+                      placeholder={item.placeholder}
+                      className="text-input w-full p-2 bg-white border-2 border-slate-100 rounded-xl"
+                      rows={2}/>
+                    {/* 음성 입력 버튼 */}
+                    <div className="flex gap-2 mt-1.5">
+                      {!isRecording ? (
+                        <button onClick={() => startReflectionRec(item.key)}
+                          className="btn flex-1 py-1.5 bg-rose-50 text-rose-600 border-2 border-rose-200 rounded-xl font-bold txt-md">
+                          🎙️ 말로 입력
+                        </button>
+                      ) : (
+                        <button onClick={() => stopReflectionRec(item.key)}
+                          className="btn flex-1 py-1.5 bg-rose-500 text-white rounded-xl font-bold txt-md animate-pulse">
+                          ⏹ 다 말했어요
+                        </button>
+                      )}
+                      {reflection[item.key] && (
+                        <button onClick={() => setReflection(r => ({ ...r, [item.key]: '' }))}
+                          className="btn px-3 py-1.5 bg-slate-100 text-slate-600 rounded-xl font-bold txt-md">
+                          🗑️
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <button onClick={() => { sfx.click(soundOn); setPhase('self_rating'); }}
+              className="btn w-full py-3 bg-green-500 text-white rounded-2xl font-bold txt-2xl shadow-lg hover:bg-green-600 mt-2 shrink-0">
+              다음 ➡️
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── 최종 별점 자기평가 ── */
+  if (phase === 'self_rating') return (
+    <div className="w-full h-full flex flex-col bg-white">
+      <Header label="⭐ 나의 다짐 평가" soundOn={soundOn} toggleSound={toggleSound} onHome={goHome}/>
+      <div className="flex-1 flex flex-col items-center justify-center px-4 py-3 text-center min-h-0 overflow-hidden">
+        <h2 className="txt-3xl font-bold text-slate-800 mb-2 word-keep shrink-0">오늘 꾸며주는 말<br/>공부, 어땠나요?</h2>
+        <p className="txt-md font-bold text-slate-400 mb-4 sm:mb-6 shrink-0">별표로 알려줘요!</p>
+        <div className="mb-4 sm:mb-6 shrink-0">
+          <StarRating value={finalStars} onChange={(s) => { setFinalStars(s); sfx.click(soundOn); }} size="large"/>
+        </div>
+        {finalStars > 0 && finalStars <= 3 && (
+          <div className="card card-amber p-3 mb-3 max-w-md shrink-0">
+            <p className="txt-md font-bold text-amber-600 word-keep text-center">
+              💡 별 3개 이하네요. 한 번 더 활동을 해볼까요?
+            </p>
+          </div>
+        )}
+        {finalStars > 0 && (
+          <div className="flex gap-2 sm:gap-3 w-full max-w-md shrink-0">
+            {finalStars <= 3 && (
+              <button onClick={() => { sfx.click(soundOn); handleLevel(qs.length); }}
+                className="btn flex-1 py-3 sm:py-4 bg-amber-500 text-white rounded-2xl font-bold txt-md shadow-lg hover:bg-amber-600">
+                🔄 다시 활동
+              </button>
+            )}
+            <button onClick={() => { sfx.click(soundOn); awardSticker('flower'); setTimeout(saveResult, 1300); }}
+              className="btn flex-[2] py-3 sm:py-4 bg-green-500 text-white rounded-2xl font-bold txt-md shadow-lg hover:bg-green-600">
+              결과 제출 ➡️
+            </button>
+          </div>
+        )}
+      </div>
+      <RewardSticker show={showReward} type={rewardType} onEnd={() => setShowReward(false)}/>
+    </div>
+  );
+
+  /* ── 수료증 ── */
+  if (phase === 'report') {
+    const learned = [...new Set(history.filter(h => h.ok).map(h => h.word))];
+    const correctCount = history.filter(h => h.ok).length;
+    const pct = qs.length > 0 ? Math.round((correctCount/qs.length)*100) : 100;
+
+    return (
+      <div className="w-full h-full flex flex-col" style={{ background:'linear-gradient(145deg,#f0fdf4 0%,#ecfeff 100%)' }}>
+        {saving && (
+          <div className="absolute inset-0 bg-white/90 flex flex-col items-center justify-center z-50">
+            <div className="w-16 h-16 border-4 border-green-100 border-t-green-500 rounded-full animate-spin mb-4"/>
+            <p className="txt-2xl font-bold text-slate-700">저장 중이에요...</p>
+          </div>
+        )}
+
+        <div className="flex items-center justify-between px-3 sm:px-4 py-2 shrink-0">
+          <h1 className="txt-2xl font-bold text-slate-900">🏆 수료증</h1>
+          <button onClick={toggleSound}
+            className={`btn w-12 h-12 rounded-2xl border-2 shadow-sm txt-2xl ${soundOn ? 'bg-green-100 text-green-600 border-green-200':'bg-white text-slate-300 border-slate-100'}`}>
+            {soundOn ? '🔊':'🔇'}
+          </button>
+        </div>
+
+        <div className="flex flex-col md:flex-row gap-2 sm:gap-3 flex-1 px-2 sm:px-4 pb-2 min-h-0 overflow-hidden">
+          {/* 인증 카드 */}
+          <div className="card card-green flex-1 p-2 sm:p-3 flex flex-col items-center justify-center text-center min-h-0">
+            <div className="emoji-lg shrink-0">📝</div>
+            <h3 className="txt-2xl font-bold text-slate-800 shrink-0">{student} 탐험가!</h3>
+            <p className="txt-md font-bold text-slate-500 italic my-1 leading-snug word-keep shrink-0">
+              꾸며주는 말을 넣어<br/>문장을 멋지게 만드는<br/>실력을 갖추었습니다.
+            </p>
+            <div className="flex gap-1 justify-center my-1 shrink-0">
+              {[1,2,3,4,5].map(s => <span key={s} className={s <= finalStars ? '':'opacity-20 grayscale'} style={{ fontSize:'clamp(1.4rem,3.5vmin,2.2rem)' }}>⭐</span>)}
+            </div>
+            <div className="bg-green-100 rounded-2xl py-1 px-3 inline-block mb-1 shrink-0">
+              <span className="txt-md font-bold text-green-700">{correctCount}/{qs.length} ({pct}%)</span>
+            </div>
+            <p className="txt-md font-bold text-slate-400 shrink-0">{new Date().toLocaleDateString('ko-KR')}</p>
+            {totalHelp > 0 && <p className="txt-md font-bold text-amber-600 mt-0.5 shrink-0">💡 도움받기 {totalHelp}번</p>}
+          </div>
+
+          {/* 배운 단어 + 스티커 */}
+          {learned.length > 0 && (
+            <div className="card card-teal flex-1 p-2 sm:p-3 flex flex-col min-h-0">
+              <p className="txt-xl font-bold text-teal-600 mb-2 text-center shrink-0">✨ 오늘 배운 꾸며주는 말</p>
+              <div className="grid grid-cols-2 gap-1.5 sm:gap-2 flex-1 content-start overflow-y-auto scroll-y pr-1">
+                {learned.map((w,i) => {
+                  const wd = WORD_DB.find(d => d.id === w) || {};
+                  return (
+                    <div key={i} className="bg-teal-50 border-2 border-teal-100 rounded-2xl px-2 py-1.5 flex items-center justify-center gap-1.5">
+                      <span style={{ fontSize:'clamp(1.3rem,3vmin,1.8rem)' }}>{wd.emoji || '✨'}</span>
+                      <span className="txt-md font-bold text-slate-700">{w}</span>
+                    </div>
+                  );
+                })}
+              </div>
+              {stickers.length > 0 && (
+                <div className="shrink-0 mt-2">
+                  <p className="txt-md font-bold text-pink-600 mb-1 text-center">🏅 받은 스티커: {stickers.length}개</p>
+                  <div className="flex flex-wrap gap-1 justify-center">
+                    {stickers.slice(0, 10).map((t,i) => (
+                      <span key={i} className="emoji-md">{t === 'flower' ? '🌸' : t === 'heart' ? '💖' : '⭐'}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="flex gap-2 px-2 sm:px-4 pb-3 shrink-0">
+          <button onClick={() => { sfx.click(soundOn); downloadCert(student, learned, finalStars, totalHelp); }}
+            className="btn flex-1 py-3 bg-green-600 text-white rounded-2xl font-bold txt-xl shadow-lg hover:bg-green-700">
+            🖼️ 수료증 저장
+          </button>
+          <button onClick={() => window.location.reload()}
+            className="btn flex-1 py-3 bg-slate-800 text-white rounded-2xl font-bold txt-xl shadow-lg hover:bg-slate-700">
+            🏠 처음으로
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
 };
 
-/* ==========================================================
-   17. Self-evaluation (별점)
-   ========================================================== */
-let currentStars=0;
-
-function goSelfEval(){
-  document.getElementById('record-overlay').classList.remove('show');
-  document.getElementById('eval-overlay').classList.add('show');
-  currentStars=0;
-  document.querySelectorAll('.star-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('eval-text').textContent='별을 눌러서 점수를 정해요';
-  document.getElementById('eval-warn').classList.remove('show');
-  document.getElementById('eval-next-btn').disabled=true;
-  playTTS('내 녹음을 들어보고 별점을 골라요!');
-}
-
-function setStars(n){
-  currentStars=n;
-  document.querySelectorAll('.star-btn').forEach(b=>{
-    const v=parseInt(b.dataset.val);
-    b.classList.toggle('active',v<=n);
-  });
-  const msgs={1:'다음엔 더 잘할 수 있어!',2:'조금만 더 연습해요',3:'잘했어요! 한 번 더 도전해볼까?',4:'아주 잘했어요! 👍',5:'완벽해요! 🌟'};
-  document.getElementById('eval-text').textContent=msgs[n];
-  if(n<=3){
-    document.getElementById('eval-warn').classList.add('show');
-  }else{
-    document.getElementById('eval-warn').classList.remove('show');
-  }
-  document.getElementById('eval-next-btn').disabled=false;
-  playSound('reward');
-}
-
-function playMyRecording(){
-  if(!audioBlob){
-    if(finalTranscript) playTTS(finalTranscript);
-    else playTTS('녹음이 없어요.');
-    return;
-  }
-  stopAllAudio();
-  const url=URL.createObjectURL(audioBlob);
-  if(currentAudioElement){try{currentAudioElement.pause();}catch(e){}}
-  currentAudioElement=new Audio(url);
-  currentAudioElement.play();
-}
-
-function redoRecording(){
-  currentRedoCount++;
-  document.getElementById('eval-overlay').classList.remove('show');
-  audioBlob=null;audioBase64='';audioChunks=[];finalTranscript='';recordState=0;
-  document.getElementById('record-word-card').textContent=currentRecordWord;
-  document.getElementById('record-status').textContent='다시 녹음해볼까요? 마이크 버튼을 눌러요.';
-  const btn=document.getElementById('record-btn');
-  btn.textContent='🎤';btn.classList.remove('recording-anim');btn.disabled=!micInitialized;
-  document.getElementById('record-overlay').classList.add('show');
-  playTTS('좋아요! 다시 한 번 도전해봐요.');
-}
-
-function finishEval(){
-  document.getElementById('eval-overlay').classList.remove('show');
-  logRecording(currentRecordWord,currentStars,finalTranscript,currentRedoCount);
-  showRewardPop(currentStars>=4?'🌟':'⭐');
-  if(finishRecordCallback) finishRecordCallback();
-  finishRecordCallback=null;
-}
-
-/* ==========================================================
-   18. Reflection (전체 끝나고 1번)
-   ========================================================== */
-let reflectionData={hardest:'',mood:'',selfMessage:''};
-
-function renderReflection(){
-  contentDiv.innerHTML='';
-  const ov=document.createElement('div');
-  ov.className='reflection-overlay show';
-  ov.id='reflection-ov';
-  ov.innerHTML=`
-    <div class="reflection-title">🌈 오늘의 배움 정리하기 🌈</div>
-
-    <div class="reflection-q">오늘 가장 어려웠던 받침은?</div>
-    <div class="reflection-options" data-group="hardest">
-      <button onclick="pickReflection('hardest','ㄹㄱ',this)">ㄹㄱ (닭)</button>
-      <button onclick="pickReflection('hardest','ㄴㅈ',this)">ㄴㅈ (앉다)</button>
-      <button onclick="pickReflection('hardest','ㄹㅂ',this)">ㄹㅂ (여덟)</button>
-      <button onclick="pickReflection('hardest','ㅂㅅ',this)">ㅂㅅ (값)</button>
-      <button onclick="pickReflection('hardest','없어요',this)">하나도 안 어려웠어요!</button>
-    </div>
-
-    <div class="reflection-q">오늘 활동 기분은?</div>
-    <div class="reflection-options" data-group="mood">
-      <button onclick="pickReflection('mood','😄 재미있었어요',this)">😄 재미있었어요</button>
-      <button onclick="pickReflection('mood','🤔 조금 어려웠어요',this)">🤔 조금 어려웠어요</button>
-      <button onclick="pickReflection('mood','💪 더 잘하고 싶어요',this)">💪 더 잘하고 싶어요</button>
-    </div>
-
-    <div class="reflection-q">스스로에게 한마디!</div>
-    <div class="reflection-options" data-group="selfMessage">
-      <button onclick="pickReflection('selfMessage','잘했어 나 자신!',this)">잘했어 나 자신! 👍</button>
-      <button onclick="pickReflection('selfMessage','다음에도 화이팅!',this)">다음에도 화이팅! 💪</button>
-      <button onclick="pickReflection('selfMessage','정말 멋졌어!',this)">정말 멋졌어! 🌟</button>
-    </div>
-
-    <button class="btn-primary" style="background:#1dd1a1;font-size:30px;padding:15px 40px;margin-top:18px;" onclick="finishReflection()">📝 정리 완료!</button>
-  `;
-  document.getElementById('app-container').appendChild(ov);
-  playTTS('오늘 배운 것을 정리해볼까요?');
-}
-
-function pickReflection(group,val,btn){
-  reflectionData[group]=val;
-  const parent=btn.parentElement;
-  parent.querySelectorAll('button').forEach(b=>b.classList.remove('selected'));
-  btn.classList.add('selected');
-}
-
-function finishReflection(){
-  if(!reflectionData.hardest||!reflectionData.mood||!reflectionData.selfMessage){
-    alert('세 가지 모두 골라주세요!');
-    return;
-  }
-  logReflection(reflectionData);
-  const ov=document.getElementById('reflection-ov');
-  if(ov) ov.remove();
-  renderCompletion();
-}
-
-/* ==========================================================
-   19. Completion / 배움 기록표
-   ========================================================== */
-let reportAudioElements=[];
-
-function renderCompletion(){
-  playTTS('모든 학습을 마쳤어요! 정말 대단해요!');
-  rainConfetti();
-  showRewardPop('🏆');
-
-  // 통계
-  const total=problemLog.filter(x=>x.type==='problem').length;
-  const correct=problemLog.filter(x=>x.type==='problem'&&x.isCorrect==='O').length;
-  const helpCount=problemLog.filter(x=>x.helpUsed==='O').length;
-  const recCount=learningHistory.length;
-  const avgStars=recCount?(learningHistory.reduce((s,x)=>s+(x.stars||0),0)/recCount).toFixed(1):0;
-
-  let rows='';
-  learningHistory.forEach((it,i)=>{
-    let audio='<span style="color:#999;">녹음 없음</span>';
-    if(it.audioBlob && it.audioBlob.size>0){
-      const url=URL.createObjectURL(it.audioBlob);
-      audio=`<audio class="report-audio" controls preload="none" data-idx="${i}" src="${url}"></audio>`;
-    }
-    const stars='⭐'.repeat(it.stars||0)+'☆'.repeat(5-(it.stars||0));
-    rows+=`<div class="report-item">
-      <div><strong style="color:#576574;">${i+1}. ${it.word}</strong>
-        <span style="color:#999;font-size:18px;margin-left:8px;">[${it.stage}단계]</span></div>
-      <div class="report-stars">${stars}</div>
-      <div style="color:#576574;">받아쓰기: ${it.sttText||'-'}</div>
-      <div>${audio}</div>
-    </div>`;
-  });
-
-  contentDiv.innerHTML=`
-    <h1 style="font-size:48px;color:#4facfe;margin-bottom:8px;">🏆 배움 기록표</h1>
-    <div style="font-size:24px;color:#576574;margin-bottom:15px;">
-      ${currentUser} 친구 | 정답 ${correct}/${total} | 녹음 ${recCount}번 | 평균별점 ⭐${avgStars} | 도움 ${helpCount}번
-    </div>
-    <div class="report-container">${rows||'<div style="text-align:center;padding:20px;">기록이 없습니다.</div>'}</div>
-    <div style="display:flex;gap:15px;">
-      <button class="btn-primary" onclick="renderIntro()">🏠 처음으로</button>
-      <button class="btn-secondary" onclick="goLevelSelect()">🔄 한 번 더!</button>
-    </div>
-  `;
-
-  // 다른 audio 재생 시 이전 audio 자동 멈춤
-  setTimeout(()=>{
-    document.querySelectorAll('audio.report-audio').forEach(a=>{
-      a.addEventListener('play',()=>{
-        document.querySelectorAll('audio.report-audio').forEach(o=>{
-          if(o!==a && !o.paused){o.pause();o.currentTime=0;}
-        });
-        stopAllAudio();
-      });
-    });
-  },200);
-}
+ReactDOM.createRoot(document.getElementById('app')).render(<App/>);
 </script>
 </body>
 </html>
