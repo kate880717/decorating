@@ -804,12 +804,14 @@ function App() {
 
   /* ── 결과 저장 ──────────────────── */
   async function saveResult() {
-    if (saved) { setPhase('report'); return; }
-    setSaving(true); setSaved(true);
+    if (saved) return;
+    setSaved(true);
+    setPhase('report');   // ← 즉시 화면 전환 (저장 오버레이가 report 화면에 표시됨)
+    setSaving(true);
+
     const learned = Array.from(new Set(history.filter(function(h){ return h.ok; }).map(function(h){ return h.word; })));
     const correctCount = history.filter(function(h){ return h.ok; }).length;
 
-    // 성찰 응답을 사람이 읽을 수 있는 라벨로 변환
     const reflectionLabels = {
       hardPart: { '단어뜻':'단어 뜻 알기', '구분':'모양/소리 구분', '문장':'문장 만들기', '없음':'하나도 안 어려웠음' },
       mood: { '재미':'재미있었음', '어려움':'조금 어려웠음', '더':'더 잘하고 싶음' },
@@ -838,7 +840,6 @@ function App() {
 
     if (GAS_URL) await gasPost(payload);
     setSaving(false);
-    setPhase('report');
   }
 
   function toggleSound() {
@@ -1487,13 +1488,20 @@ function App() {
             <div className="flex gap-2 sm:gap-3 w-full max-w-md shrink-0">
               {finalStars <= 3 && (
                 <button onClick={function(){ sfx.click(soundOn); handleLevel(qs.length); }}
-                  className="btn flex-1 py-3 sm:py-4 bg-amber-500 text-white rounded-2xl font-bold txt-md shadow-lg hover:bg-amber-600">
+                  disabled={saved}
+                  className="btn flex-1 py-3 sm:py-4 bg-amber-500 text-white rounded-2xl font-bold txt-md shadow-lg hover:bg-amber-600 disabled:opacity-50">
                   🔄 다시 활동
                 </button>
               )}
-              <button onClick={function(){ sfx.click(soundOn); awardSticker('flower'); setTimeout(saveResult, 1300); }}
-                className="btn flex-[2] py-3 sm:py-4 bg-green-500 text-white rounded-2xl font-bold txt-md shadow-lg hover:bg-green-600">
-                결과 제출 ➡️
+              <button onClick={function(){
+                if (saved) return;
+                sfx.click(soundOn);
+                awardSticker('flower');
+                saveResult();
+              }}
+                disabled={saved}
+                className="btn flex-[2] py-3 sm:py-4 bg-green-500 text-white rounded-2xl font-bold txt-md shadow-lg hover:bg-green-600 disabled:opacity-60">
+                {saved ? '저장 중...' : '결과 제출 ➡️'}
               </button>
             </div>
           )}
