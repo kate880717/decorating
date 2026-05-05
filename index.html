@@ -116,7 +116,24 @@ const gasPost = async (data) => {
   } catch(_){}
 };
 
-/* ── 학생 / 단어 / 퀴즈 기본값 ────────────── */
+/* ── 🔤 한국어 조사 자동 처리 (받침 판별) ─── */
+const hasJongseong = (str) => {
+  if (!str) return false;
+  const lastChar = str[str.length - 1];
+  const code = lastChar.charCodeAt(0);
+  // 한글 범위 체크
+  if (code < 0xAC00 || code > 0xD7A3) return false;
+  // (코드 - 0xAC00) % 28 != 0 이면 받침 있음
+  return (code - 0xAC00) % 28 !== 0;
+};
+// 은/는, 이/가, 을/를, 와/과, 이에요/예요
+const josa = {
+  은_는: (w) => w + (hasJongseong(w) ? '은' : '는'),
+  이_가: (w) => w + (hasJongseong(w) ? '이' : '가'),
+  을_를: (w) => w + (hasJongseong(w) ? '을' : '를'),
+  와_과: (w) => w + (hasJongseong(w) ? '과' : '와'),
+  이에요_예요: (w) => w + (hasJongseong(w) ? '이에요' : '예요'),
+};
 const SAMPLES = ['김민준','이하은','박서준','최지아','정수아','한지호'];
 let WORD_DB = [
   { id:'펄럭펄럭', cat:'모양', emoji:'🦋', desc:'나비나 깃발이 가볍게 흔들리는 모양', ex:'나비가 펄럭펄럭 날아갑니다.' },
@@ -492,7 +509,6 @@ const App = () => {
     else if (phase === 'reflection') speak('오늘 배운 것을 정리해볼까요?', true);
     else if (phase === 'self_rating') speak('나의 다짐을 별표로 평가해봐요!', true);
     else if (phase === 'report') speak('수료증이 나왔어요! 정말 잘했어요!', true);
-  }, [phase, conceptIdx, qIdx, conceptStep, soundOn]);
 
   /* ── 시작 / 레벨 선택 ─────────────────── */
   const handleLevel = useCallback((count) => {
@@ -542,31 +558,32 @@ const App = () => {
     ));
     if (correct) {
       sfx.correct(soundOn);
-      // ✅ 정답 피드백 (큰 글씨로)
+      // ✅ 정답 피드백
+      const wordWithJosa = josa.은_는(item.word);
       setPracticeFb({
         ok: true,
         word: item.word,
         emoji: item.emoji,
         cat: cat,
-        msg: `${item.word}는 ${cat}을 꾸며주는 말이 맞아요!`
+        msg: `${wordWithJosa} ${cat}을 꾸며주는 말이 맞아요!`
       });
-      if (soundOn) speak(`정답이에요! ${item.word}는 ${cat}을 꾸며주는 말이에요.`, true);
+      if (soundOn) speak(`정답이에요! ${wordWithJosa} ${cat}을 꾸며주는 말이에요.`, true);
       setTimeout(() => setPracticeFb(null), 1800);
     } else {
       sfx.wrong(soundOn);
       setPracticeShake(dragging);
-      // ❌ 오답 피드백 (큰 글씨로 명확하게)
+      // ❌ 오답 피드백
+      const wordWithJosa = josa.은_는(item.word);
       setPracticeFb({
         ok: false,
         word: item.word,
         emoji: item.emoji,
         wrongCat: cat,
         correctCat: item.correctCat,
-        msg: `${item.word}는 ${cat}이 아니에요. ${item.correctCat}을 꾸며주는 말이에요!`
+        msg: `${wordWithJosa} ${cat}이 아니에요. ${item.correctCat}을 꾸며주는 말이에요!`
       });
-      if (soundOn) speak(`아쉬워요! ${item.word}는 ${item.correctCat}을 꾸며주는 말이에요. 다시 해볼까요?`, true);
+      if (soundOn) speak(`아쉬워요! ${wordWithJosa} ${item.correctCat}을 꾸며주는 말이에요. 다시 해볼까요?`, true);
       setTimeout(() => setPracticeShake(null), 500);
-      // 잠시 후 리셋 (틀린 것)
       setTimeout(() => {
         setPracticeItems(prev => prev.map((it,i) =>
           i === dragging ? { ...it, placed: null, correct: undefined } : it
@@ -612,13 +629,13 @@ const App = () => {
       }]);
     }
     if (ok) {
-      setFb({ ok:true, msg:q.fb, concept:q.concept });
+      setFb({ ok:true, msg: fixKoreanJosa(q.fb), concept:q.concept });
       if (reviewMode) setWrong(w => w.filter(x => x.id !== q.id));
       sfx.correct(soundOn);
       confetti({ particleCount:90, spread:60, origin:{ y:.65 } });
-      if (soundOn) speak(q.fb, true);
+      if (soundOn) speak(fixKoreanJosa(q.fb), true);
     } else {
-      setFb({ ok:false, hint:`힌트: ${q.a}는 ${q.concept}이에요.` });
+      setFb({ ok:false, hint:`힌트: "${q.a}" ${josa.은_는(q.a)} ${q.concept}이에요.` });
       if (!wrong.find(x => x.id === q.id)) setWrong(w => [...w, q]);
       sfx.wrong(soundOn);
       if (soundOn) speak('아쉬워요, 다시 생각해볼까요?', true);
@@ -1300,7 +1317,7 @@ const App = () => {
             {recWord && (
               <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-2 sm:p-3 mb-2 shrink-0">
                 <p className="txt-md font-bold text-amber-700 text-center word-keep">
-                  📝 예시: "{exWord.ex || `${recWord}을 넣어 문장을 만들어요`}"
+                  📝 예시: "{exWord.ex || `${josa.을_를(recWord)} 넣어 문장을 만들어요`}"
                 </p>
               </div>
             )}
@@ -1366,7 +1383,7 @@ const App = () => {
               {inputMode === 'keyboard' && (
                 <div className="shrink-0">
                   <textarea value={typedText} onChange={(e) => setTypedText(e.target.value)}
-                    placeholder={`${recWord}을(를) 넣어 문장을 적어보세요...`}
+                    placeholder={`${josa.을_를(recWord)} 넣어 문장을 적어보세요...`}
                     className="text-input w-full p-3 bg-blue-50 border-2 border-blue-200 rounded-2xl"
                     rows={3}/>
                   <button onClick={playFinalSentence} disabled={!typedText.trim()}
@@ -1381,7 +1398,7 @@ const App = () => {
             {showSelfEval && (
               <div className="bg-pink-50 border-2 border-pink-200 rounded-2xl p-2 sm:p-3 shrink-0">
                 <div className={`mb-1.5 p-1.5 rounded-xl txt-md font-bold text-center ${rubricCheck ? 'bg-emerald-100 text-emerald-700':'bg-amber-100 text-amber-700'}`}>
-                  {rubricCheck ? `✅ "${recWord}"이(가) 들어있어요!` : `💡 "${recWord}"을(를) 꼭 넣어주세요`}
+                  {rubricCheck ? `✅ "${recWord}" ${hasJongseong(recWord) ? '이' : '가'} 들어있어요!` : `💡 "${recWord}" ${hasJongseong(recWord) ? '을' : '를'} 꼭 넣어주세요`}
                 </div>
                 <p className="text-center txt-md font-bold text-pink-700 mb-1.5">
                   📢 들어보고 별점을 매겨요!
