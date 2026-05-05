@@ -150,7 +150,7 @@ let QUIZ_Q = [
   { id:1, img:'🦋', before:'나비가', after:'날아갑니다.', opts:['펄럭펄럭','쿵쿵'], a:'펄럭펄럭', fb:'맞아요! 나비 날개는 가볍게 펄럭펄럭 움직여요.', concept:'모양을 꾸며주는 말' },
   { id:2, img:'🇰🇷', before:'태극기가 바람에', after:'휘날립니다.', opts:['펄럭펄럭','살금살금'], a:'펄럭펄럭', fb:'깃발이 바람에 흔들리는 모양도 펄럭펄럭이에요.', concept:'모양을 꾸며주는 말' },
   { id:3, img:'😴', before:'아기가', after:'자고 있어요.', opts:['쨍그랑','쿨쿨'], a:'쿨쿨', fb:'아기가 깊이 잠든 숨소리는 쿨쿨이에요.', concept:'소리를 꾸며주는 말' },
-  { id:4, img:'🐻', before:'잠꾸러기 곰이', after:'잡니다.', opts:['쿨쿨','반짝반짝'], a:'쿨쿨', fb:'동물들이 깊게 잘 때도 쿨쿨 잔다고 해요.', concept:'소리를 꾸며주는 말' },
+  { id:4, img:'🐻', before:'잠꾸러기 곰이', after:'잠을 잡니다.', opts:['쿨쿨','반짝반짝'], a:'쿨쿨', fb:'동물들이 깊이 잘 때도 쿨쿨 잔다고 해요.', concept:'소리를 꾸며주는 말' },
   { id:5, img:'🐶', before:'강아지가', after:'짖어요.', opts:['살금살금','멍멍'], a:'멍멍', fb:'강아지는 씩씩하게 멍멍 하고 짖어요.', concept:'소리를 꾸며주는 말' },
   { id:6, img:'🐕', before:'누렁이가 꼬리를 흔들며', after:'짖습니다.', opts:['멍멍','졸졸'], a:'멍멍', fb:'강아지 짖는 소리는 멍멍이에요.', concept:'소리를 꾸며주는 말' },
   { id:7, img:'🌻', before:'해바라기가', after:'피었습니다.', opts:['활짝','엉엉'], a:'활짝', fb:'꽃이 크게 핀 모양은 활짝이에요.', concept:'모양을 꾸며주는 말' },
@@ -231,7 +231,7 @@ function downloadCert(name, learned, stars, helpCount) {
   ctx.font = '900 92px sans-serif'; ctx.fillStyle = '#059669';
   ctx.fillText(name + ' 탐험가', 600, 510);
   ctx.font = '50px sans-serif'; ctx.fillStyle = '#475569';
-  ['위 탐험가는 문장을 생생하게 꾸며주는 말을','바르게 사용하는 실력을 갖추었기에','이 수료증을 수여합니다.']
+  ['위 탐험가는 꾸며주는 말을 사용하여','문장을 생생하게 만드는 실력을','갖추었기에 이 수료증을 수여합니다.']
     .forEach(function(l, i){ ctx.fillText(l, 600, 680 + i*90); });
   if (stars > 0) {
     ctx.font = '70px sans-serif';
@@ -498,7 +498,7 @@ function App() {
       const q = list[qIdx];
       if (q) speak(q.before + ', 빈칸, ' + q.after + '. 알맞은 꾸며주는 말을 골라보세요.', true);
     }
-    else if (phase === 'recording') speak('꾸며주는 말을 두 개 이상 넣어 문장을 만들어볼까요?', true);
+    else if (phase === 'recording') speak('꾸며주는 말을 넣어 멋진 문장을 만들어볼까요?', true);
     else if (phase === 'reflection') speak('오늘 배운 것을 정리해볼까요?', true);
     else if (phase === 'self_rating') speak('나의 다짐을 별표로 평가해봐요!', true);
     else if (phase === 'report') speak('수료증이 나왔어요! 정말 잘했어요!', true);
@@ -924,44 +924,46 @@ function App() {
   /* 시작 */
   if (phase === 'start') {
     return (
-      <div className="w-full h-full flex flex-col items-center justify-center p-4 sm:p-6 relative overflow-hidden"
+      <div className="w-full h-full flex flex-col items-center justify-center p-3 sm:p-5 relative overflow-hidden"
         style={{ background:'linear-gradient(145deg,#f0fdf4 0%,#ecfeff 100%)' }}>
-        <div className="absolute top-6 left-6 opacity-10 float emoji-xl">🖊️</div>
-        <div className="absolute bottom-12 right-6 opacity-10 float emoji-xl" style={{ animationDelay:'.8s' }}>🌿</div>
+        <div className="absolute top-4 left-4 opacity-10 float emoji-xl">🖊️</div>
+        <div className="absolute bottom-8 right-4 opacity-10 float emoji-xl" style={{ animationDelay:'.8s' }}>🌿</div>
 
-        <div className="float mb-3 shrink-0"><Mascot size={110}/></div>
-        <h1 className="txt-hero font-bold text-slate-900 mb-1 text-center shrink-0 word-keep">
+        <div className="float shrink-0"><Mascot size={90}/></div>
+        <h1 className="txt-hero font-bold text-slate-900 text-center shrink-0 word-keep">
           꾸며주는 말 <span className="text-green-500">탐험대</span> ✨
         </h1>
-        <p className="txt-md font-bold text-slate-500 mb-4 sm:mb-6 shrink-0">문장을 더 생생하게 만들어봐요!</p>
+        <p className="txt-md font-bold text-slate-500 mb-3 sm:mb-4 shrink-0">문장을 더 생생하게 만들어봐요!</p>
 
-        <div className="card card-green w-full max-w-sm p-5 sm:p-7 shadow-xl">
-          <p className="text-center font-bold text-green-500 mb-3 txt-md">📝 내 이름을 골라요</p>
+        <div className="card card-green w-full max-w-sm p-4 sm:p-6 shadow-xl shrink-0">
+          <p className="text-center font-bold text-green-500 mb-2 txt-md">📝 내 이름을 골라요</p>
           <select value={student} onChange={function(e){ setStudent(e.target.value); }}
-            className="w-full p-3 sm:p-4 mb-4 bg-slate-50 border-2 border-slate-100 rounded-2xl txt-2xl font-bold text-slate-800 text-center focus:outline-none focus:border-green-400">
+            className="w-full p-3 mb-3 bg-slate-50 border-2 border-slate-100 rounded-2xl txt-2xl font-bold text-slate-800 text-center focus:outline-none focus:border-green-400">
             {students.map(function(s){ return <option key={s} value={s}>{s}</option>; })}
           </select>
 
           {!micReady ? (
             <button onClick={requestMic}
-              className="btn w-full py-3 sm:py-4 mb-3 bg-green-50 text-green-700 border-2 border-green-200 rounded-2xl font-bold txt-md">
+              className="btn w-full py-3 mb-2 bg-green-50 text-green-700 border-2 border-green-200 rounded-2xl font-bold txt-md">
               🎙️ 마이크 준비하기
             </button>
           ) : (
-            <p className="text-center text-emerald-600 font-bold txt-md mb-3">✅ 마이크 준비 완료!</p>
+            <p className="text-center text-emerald-600 font-bold txt-md mb-2">✅ 마이크 준비 완료!</p>
           )}
 
           <button onClick={function(){ sfx.click(soundOn); setPhase('intro'); }}
-            className="btn w-full py-4 sm:py-5 bg-green-500 text-white rounded-2xl font-bold txt-3xl shadow-lg hover:bg-green-600">
+            className="btn w-full py-3 sm:py-4 bg-green-500 text-white rounded-2xl font-bold txt-3xl shadow-lg hover:bg-green-600">
             시작하기 ▶
           </button>
         </div>
 
-        <button onClick={toggleSound}
-          className={"btn mt-4 w-14 h-14 sm:w-16 sm:h-16 rounded-2xl border-2 shadow-sm txt-3xl " + (soundOn ? 'bg-green-100 text-green-600 border-green-200':'bg-white text-slate-300 border-slate-100')}>
-          {soundOn ? '🔊' : '🔇'}
-        </button>
-        <p className="text-slate-500 mt-2 txt-md font-bold">스피커: {soundOn ? '켜짐 (읽어줘요)' : '꺼짐'}</p>
+        <div className="flex items-center gap-2 mt-3 shrink-0">
+          <button onClick={toggleSound}
+            className={"btn w-12 h-12 sm:w-14 sm:h-14 rounded-2xl border-2 shadow-sm txt-2xl " + (soundOn ? 'bg-green-100 text-green-600 border-green-200':'bg-white text-slate-300 border-slate-100')}>
+            {soundOn ? '🔊' : '🔇'}
+          </button>
+          <p className="text-slate-500 txt-md font-bold">스피커: {soundOn ? '켜짐' : '꺼짐'}</p>
+        </div>
       </div>
     );
   }
@@ -975,14 +977,13 @@ function App() {
           <div className="inline-block bg-green-100 text-green-700 font-bold px-4 py-2 rounded-full mb-3 txt-md shrink-0">
             📝 오늘의 공부 약속
           </div>
-          <h2 className="txt-3xl font-bold text-slate-800 mb-3 sm:mb-5 leading-tight word-keep shrink-0">
+          <h2 className="txt-3xl font-bold text-slate-800 mb-3 sm:mb-4 leading-tight word-keep shrink-0">
             꾸며주는 말을 넣어<br/>
-            <span className="text-green-500">문장을 더 생생하게</span> 만들어봐요!
+            <span className="text-green-500">문장을 더 생생하게!</span>
           </h2>
-          <div className="card card-green p-4 sm:p-5 max-w-xl mx-auto mb-4 sm:mb-6 txt-md font-bold text-slate-500 word-keep shrink-0">
+          <div className="card card-green p-3 sm:p-4 max-w-xl mx-auto mb-4 txt-md font-bold text-slate-500 word-keep shrink-0">
             모양이나 소리를 나타내는 말을 넣으면<br/>
-            문장이 훨씬 재미있어져요!<br/>
-            함께 탐험해볼까요? 🎒
+            문장이 훨씬 재미있어져요! 🎒
           </div>
           <button onClick={function(){ sfx.click(soundOn); setPhase('level_select'); }}
             className="btn w-full max-w-sm py-3 sm:py-4 bg-green-500 text-white rounded-2xl font-bold txt-2xl shadow-lg hover:bg-green-600 shrink-0">
@@ -995,9 +996,9 @@ function App() {
 
   /* 레벨 선택 */
   if (phase === 'level_select') {
-    const levels = [[3,'🌱','짧게','5문제 미만은 끝에 1번 녹음'],
-                    [5,'🌿','보통','5문제 + 1번 녹음'],
-                    [10,'🌳','도전','10문제 + 2번 녹음']];
+    const levels = [[3,'🌱','짧게','문제 3개 + 녹음 1번'],
+                    [5,'🌿','보통','문제 5개 + 녹음 1번'],
+                    [10,'🌳','도전','문제 10개 + 녹음 2번']];
     return (
       <div className="w-full h-full flex flex-col bg-white">
         <Header label="📚 탐험 수 선택" soundOn={soundOn} toggleSound={toggleSound} onHome={goHome}/>
@@ -1284,7 +1285,7 @@ function App() {
 
             <p className="txt-2xl font-bold text-green-600 text-center shrink-0">꾸며주는 말로 문장 만들기!</p>
             <p className="txt-md font-bold text-amber-600 text-center mb-2 shrink-0 word-keep">
-              ✨ <strong>꾸며주는 말 2개 이상</strong> 넣어 말해볼까요?
+              ✨ 아래 단어를 골라서 멋진 문장을 만들어요!
             </p>
 
             {/* 단어 선택 */}
@@ -1365,7 +1366,7 @@ function App() {
                 <div className="shrink-0">
                   <textarea value={typedText} onChange={function(e){ setTypedText(e.target.value); }}
                     placeholder={josa.eulReul(recWord) + ' 넣어 문장을 적어보세요...'}
-                    className="text-input w-full p-3 bg-blue-50 border-2 border-blue-200 rounded-2xl"
+                    className="text-input w-full p-3 bg-blue-50 border-2 border-blue-200 rounded-2xl resize-none"
                     rows={3}/>
                   <button onClick={playFinalSentence} disabled={!typedText.trim()}
                     className="btn w-full mt-2 py-2 bg-blue-500 text-white rounded-xl font-bold txt-md disabled:bg-slate-300">
@@ -1396,7 +1397,7 @@ function App() {
                   <button onClick={function(){ sfx.click(soundOn); awardSticker('star'); setTimeout(submitRecSelfEval, 1200); }}
                     disabled={recSelfStars === 0 || (inputMode === 'voice' && !sttText.trim()) || (inputMode === 'keyboard' && !typedText.trim())}
                     className="btn flex-[2] py-2 bg-green-600 text-white rounded-2xl font-bold txt-md shadow-lg hover:bg-green-700 disabled:bg-slate-300">
-                    {currentRecIdx < recordCount - 1 ? '제출하고 다음 ▶' : '제출하기 🏆'}
+                    {currentRecIdx < recordCount - 1 ? '다음 문제로 ▶' : '제출하기 🏆'}
                   </button>
                 </div>
               </div>
@@ -1454,7 +1455,7 @@ function App() {
                         setReflection(function(r){ return Object.assign({}, r, { [item.key]: val }); });
                       }}
                       placeholder={item.placeholder}
-                      className="text-input w-full p-2 bg-white border-2 border-slate-100 rounded-xl"
+                      className="text-input w-full p-2 bg-white border-2 border-slate-100 rounded-xl resize-none"
                       rows={2}/>
                     <div className="flex gap-2 mt-1.5">
                       {!isRecording ? (
@@ -1558,7 +1559,7 @@ function App() {
             <div className="emoji-lg shrink-0">📝</div>
             <h3 className="txt-2xl font-bold text-slate-800 shrink-0">{student} 탐험가!</h3>
             <p className="txt-md font-bold text-slate-500 italic my-1 word-keep shrink-0">
-              꾸며주는 말을 넣어<br/>문장을 멋지게 만드는<br/>실력을 갖추었습니다.
+              꾸며주는 말을 사용하여<br/>문장을 생생하게 만드는<br/>실력을 갖추었습니다.
             </p>
             <div className="flex gap-1 justify-center my-1 shrink-0">
               {[1,2,3,4,5].map(function(s){
